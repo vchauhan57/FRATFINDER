@@ -6,32 +6,39 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#1D3D47'
+        backgroundColor: '#172A45'
     },
     card: {
         width: 300,
         height: 400,
         borderRadius: 8,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#A67C00',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20
+        padding: 15
     },
     image: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 250,
+        height: 250,
+        borderRadius: 75,
         marginBottom: 20
     },
     name: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 10
+        marginBottom: 10,
+        color: '#FFFFFF'
     },
     bio: {
         fontSize: 16,
-        color: '#666',
+        color: '#FFFFFF',
         textAlign: 'center'
+    },
+    header: {
+        fontSize: 40,
+        color: '#A67C00',
+        fontWeight: 'bold',
+        marginBottom: 80
     }
 });
 
@@ -48,6 +55,7 @@ const ProfileCard = () => {
 export default function App() {
     return (
         <View style={styles.container}>
+            <Text style={styles.header}>FratFinder</Text>
             <ProfileCard />
         </View>
     );
