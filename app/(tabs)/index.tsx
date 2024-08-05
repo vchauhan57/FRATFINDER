@@ -65,7 +65,7 @@ const IndexScreen = () => {
 
     const interpolateBorderColor = (index) => animatedValues[index].interpolate({
         inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
-        outputRange: ['#ff0000', '#fff', '#00ff00'],
+        outputRange: ['#8B0000', '#fff', '#006400'], // Darker red and green
         extrapolate: 'clamp'
     });
 

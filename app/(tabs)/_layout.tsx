@@ -41,7 +41,7 @@ function TabNavigator() {
 
   const tabBarBackgroundColor = tabBarColor.interpolate({
     inputRange: [-1, 0, 1],
-    outputRange: ['#ff0000', '#1a1a1a', '#00ff00'],
+    outputRange: ['#8B0000', '#1a1a1a', '#006400'], // Darker red and green
   });
 
   return (
