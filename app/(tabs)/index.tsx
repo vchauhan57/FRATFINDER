@@ -6,6 +6,7 @@ const IndexScreen = () => {
     const initialCards = [
         { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg') },
         { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpeg') },
+        { id: 3, name: "Lebron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpeg')},
     ];
 
     const [cards, setCards] = useState(initialCards);
