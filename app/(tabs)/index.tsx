@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, Image } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 
 const IndexScreen = () => {
-    const [cards, setCards] = useState([
+    const initialCards = [
         { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg') },
         { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpeg') },
-    ]);
+    ];
+
+    const [cards, setCards] = useState(initialCards);
     const [cardIndex, setCardIndex] = useState(0);
 
-    const onSwiped = (type) => {
-        console.log(`Swiped ${type}`);
-        const nextIndex = (cardIndex + 1) % cards.length;
-        setCardIndex(nextIndex);
+    useEffect(() => {
+        // Automatically reset the index to 0 when the last card is swiped
+        if (cardIndex >= cards.length) {
+            setCardIndex(0);
+        }
+    }, [cardIndex, cards.length]);
+
+    const onSwiped = () => {
+        setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
     };
 
     return (
@@ -27,11 +34,11 @@ const IndexScreen = () => {
                         <Text style={styles.bio}>{card.bio}</Text>
                     </View>
                 )}
-                onSwipedLeft={() => onSwiped('left')}
-                onSwipedRight={() => onSwiped('right')}
+                onSwiped={onSwiped}
                 cardIndex={cardIndex}
-                stackSize={3}
+                infinite
                 backgroundColor={'transparent'}
+                stackSize={3}
                 stackSeparation={15}
                 disableBottomSwipe
                 disableTopSwipe
