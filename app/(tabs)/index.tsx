@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, Image, Dimensions } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
+import {LinearGradient} from 'expo-linear-gradient';
 
 const IndexScreen = () => {
     const initialCards = [
@@ -30,8 +31,13 @@ const IndexScreen = () => {
                 renderCard={(card) => (
                     <View style={styles.card}>
                         <Image style={styles.image} source={card.image} />
-                        <Text style={styles.name}>{card.name}</Text>
-                        <Text style={styles.bio}>{card.bio}</Text>
+                        <LinearGradient
+                            colors={['transparent', 'rgba(0,0,0,0.8)']} // Adjust gradient colors as needed
+                            style={styles.gradientOverlay}
+                        >
+                            <Text style={styles.name}>{card.name}</Text>
+                            <Text style={styles.bio}>{card.bio}</Text>
+                        </LinearGradient>
                     </View>
                 )}
                 onSwiped={onSwiped}
@@ -91,7 +97,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#172A45',
+        backgroundColor: '#050505', // This is the container background color
         paddingTop: 30
     },
     logo: {
@@ -103,32 +109,41 @@ const styles = StyleSheet.create({
         color: 'gold'
     },
     card: {
-        width: Dimensions.get('window').width - 50, // Adjust card width to be close to the edges
-        height: Dimensions.get('window').height - 200, // Adjust card height to be close to the edges
+        width: Dimensions.get('window').width - 50,
+        height: Dimensions.get('window').height - 200,
         borderRadius: 8,
-        backgroundColor: '#FFFFFF',
-        justifyContent: 'flex-start', // Align items to start at the top of the card
+        backgroundColor: '#FFFFFF', // Might not need this
+        justifyContent: 'flex-end', // Align items to the bottom
         alignItems: 'center',
         padding: 10,
         marginTop: -10,
         margin: 5,
+        overflow: 'hidden', // Important for borderRadius
     },
     image: {
-        width: '100%', // Make the image take up the full width of the card
-        height: Dimensions.get('window').height - 300, // Adjust image height to be proportional to the card height
-        borderRadius: 8, // Remove circular shape
+        width: '100%',
+        height: '100%', // Change to full height of the card
+        position: 'absolute', // Position it absolutely to cover the whole card
+        borderRadius: 30,
+    },
+    gradientOverlay: {
+        width: '100%',
+        height: '50%', // Cover the lower 50% of the image
+        position: 'absolute',
+        bottom: 0, // Start from the bottom of the card
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
     },
     name: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#000',
-        marginTop: 10 // Add margin top to separate from the image
+        color: '#fff', // Ensuring text is visible on the darker gradient
     },
     bio: {
         fontSize: 18,
-        color: '#333',
+        color: '#fff', // Ensuring text is visible on the darker gradient
         textAlign: 'center',
-        marginTop: 10 // Add margin top to separate from the name
     }
 });
 
