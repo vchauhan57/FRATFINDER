@@ -2,15 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, Text, Image, Dimensions, Animated } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useDragging } from './DraggingContext';
 
 const IndexScreen = () => {
     const initialCards = [
         { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg') },
         { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpeg') },
-        { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpeg')},
-        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abeltesfaye.jpeg')},
+        { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpeg') },
+        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abeltesfaye.jpeg') },
     ];
 
+    const { setIsDragging, setSwipeDirection } = useDragging();
     const [cards, setCards] = useState(initialCards);
     const [cardIndex, setCardIndex] = useState(0);
     const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current;
@@ -25,25 +27,53 @@ const IndexScreen = () => {
         }
     }, [cardIndex, cards.length]);
 
-    const onSwiped = () => {
+    const onSwiped = (index) => {
         setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
+        resetAnimatedValue(index);
+        setIsDragging(false); // Reset dragging state
+        setSwipeDirection(null); // Reset swipe direction
     };
 
-    const onSwiping = (index, x) => {
-        if (index < animatedValues.length) {
-            animatedValues[index].setValue(x);
-        }
-    };
-
-    const onSwipedAborted = (index) => {
+    const resetAnimatedValue = (index) => {
         if (index < animatedValues.length) {
             Animated.timing(animatedValues[index], {
                 toValue: 0,
-                duration: 300,
+                duration: 0, // Reset immediately
                 useNativeDriver: false,
             }).start();
         }
     };
+
+    const onSwiping = (index, x) => {
+        if (Math.abs(x) > 1) { // Detect smaller movements earlier
+            if (index < animatedValues.length) {
+                animatedValues[index].setValue(x);
+            }
+            setIsDragging(true); // Set dragging state
+            setSwipeDirection(x > 0 ? 'right' : 'left'); // Set swipe direction
+        } else {
+            setIsDragging(false); // Reset dragging state
+            setSwipeDirection(null); // Reset swipe direction
+        }
+    };
+
+    const onSwipedAborted = (index) => {
+        resetAnimatedValue(index);
+        setIsDragging(false); // Reset dragging state
+        setSwipeDirection(null); // Reset swipe direction
+    };
+
+    const interpolateBorderColor = (index) => animatedValues[index].interpolate({
+        inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
+        outputRange: ['#ff0000', '#fff', '#00ff00'],
+        extrapolate: 'clamp'
+    });
+
+    const interpolateBorderWidth = (index) => animatedValues[index].interpolate({
+        inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
+        outputRange: [5, 0, 5], // Border width changes from 5 to 0 to 5
+        extrapolate: 'clamp'
+    });
 
     return (
         <View style={styles.container}>
@@ -51,21 +81,12 @@ const IndexScreen = () => {
             <Swiper
                 cards={cards}
                 renderCard={(card, index) => {
-                    const borderColor = animatedValues[index].interpolate({
-                        inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
-                        outputRange: ['#ff0000', '#fff', '#00ff00'],
-                        extrapolate: 'clamp'
-                    });
-
-                    const shadowColor = animatedValues[index].interpolate({
-                        inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
-                        outputRange: ['rgba(255,0,0,0.5)', 'transparent', 'rgba(0,255,0,0.5)'],
-                        extrapolate: 'clamp'
-                    });
+                    const borderColor = interpolateBorderColor(index);
+                    const borderWidth = interpolateBorderWidth(index);
 
                     return (
                         <View style={styles.cardContainer}>
-                            <Animated.View style={[styles.imageContainer, { borderColor, shadowColor, shadowOpacity: 1, shadowRadius: 10, shadowOffset: { width: 0, height: 0 } }]}>
+                            <Animated.View style={[styles.imageContainer, { borderColor, borderWidth }]}>
                                 <Image style={styles.image} source={card.image} />
                                 <LinearGradient
                                     colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,1.1)']}
@@ -78,7 +99,7 @@ const IndexScreen = () => {
                         </View>
                     );
                 }}
-                onSwiped={onSwiped}
+                onSwiped={(index) => onSwiped(index)}
                 onSwiping={(x) => onSwiping(cardIndex, x)}
                 onSwipedAborted={() => onSwipedAborted(cardIndex)}
                 cardIndex={cardIndex}
@@ -120,7 +141,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         borderRadius: 40,
-        borderWidth: 3,
         overflow: 'hidden',
     },
     image: {
