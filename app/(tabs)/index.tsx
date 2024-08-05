@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Image } from 'react-native';
+import { View, StyleSheet, Text, Image, Dimensions } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 
 const IndexScreen = () => {
@@ -13,7 +13,6 @@ const IndexScreen = () => {
     const [cardIndex, setCardIndex] = useState(0);
 
     useEffect(() => {
-        // Automatically reset the index to 0 when the last card is swiped
         if (cardIndex >= cards.length) {
             setCardIndex(0);
         }
@@ -43,7 +42,7 @@ const IndexScreen = () => {
                 stackSeparation={15}
                 disableBottomSwipe
                 disableTopSwipe
-                containerStyle={{ marginTop: 50, marginLeft: 20 }}
+                containerStyle={{ marginTop: 50 }}
                 overlayLabels={{
                     left: {
                         title: 'NOPE',
@@ -104,29 +103,32 @@ const styles = StyleSheet.create({
         color: 'gold'
     },
     card: {
-        width: 300,
-        height: 400,
+        width: Dimensions.get('window').width - 50, // Adjust card width to be close to the edges
+        height: Dimensions.get('window').height - 200, // Adjust card height to be close to the edges
         borderRadius: 8,
         backgroundColor: '#FFFFFF',
-        justifyContent: 'center',
+        justifyContent: 'flex-start', // Align items to start at the top of the card
         alignItems: 'center',
-        padding: 20
+        padding: 10,
+        marginTop: -10,
+        margin: 5,
     },
     image: {
-        width: 250,
-        height: 250,
-        borderRadius: 125,
-        marginBottom: 20
+        width: '100%', // Make the image take up the full width of the card
+        height: Dimensions.get('window').height - 300, // Adjust image height to be proportional to the card height
+        borderRadius: 8, // Remove circular shape
     },
     name: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#000'
+        color: '#000',
+        marginTop: 10 // Add margin top to separate from the image
     },
     bio: {
         fontSize: 18,
         color: '#333',
-        textAlign: 'center'
+        textAlign: 'center',
+        marginTop: 10 // Add margin top to separate from the name
     }
 });
 
