@@ -32,7 +32,7 @@ function TabNavigator() {
     } else {
       Animated.timing(tabBarColor, {
         toValue: 0,
-        duration: 300,
+        duration: 500, // Increase the duration for a more gradual fade back
         easing: Easing.linear,
         useNativeDriver: false,
       }).start();
