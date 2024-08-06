@@ -18,6 +18,7 @@ const IndexScreen = () => {
     const [cards, setCards] = useState(initialCards);
     const [cardIndex, setCardIndex] = useState(0);
     const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current;
+    const swiperRef = useRef(null); // Create a reference to the Swiper component
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -33,42 +34,66 @@ const IndexScreen = () => {
     const onSwiped = (index) => {
         setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
         resetAnimatedValue(index);
-        setIsDragging(false); // Reset dragging state
-        setSwipeDirection(null); // Reset swipe direction
+        setIsDragging(false);
+        setSwipeDirection(null);
+    };
+
+    const onSwipedLeft = () => {
+        if (swiperRef.current) {
+            setSwipeDirection('left');
+            setIsDragging(true);
+            swiperRef.current.swipeLeft();
+            setTimeout(() => {
+                setIsDragging(false);
+                setSwipeDirection(null);
+            }, 500); // Adjust this value if needed
+        }
+    };
+
+    const onSwipedRight = () => {
+        if (swiperRef.current) {
+            setSwipeDirection('right');
+            setIsDragging(true);
+            swiperRef.current.swipeRight();
+            setTimeout(() => {
+                setIsDragging(false);
+                setSwipeDirection(null);
+            }, 500); // Adjust this value if needed
+        }
     };
 
     const resetAnimatedValue = (index) => {
         if (index < animatedValues.length) {
             Animated.timing(animatedValues[index], {
                 toValue: 0,
-                duration: 0, // Reset immediately
+                duration: 0,
                 useNativeDriver: false,
             }).start();
         }
     };
 
     const onSwiping = (index, x) => {
-        if (Math.abs(x) > 1) { // Detect smaller movements earlier
+        if (Math.abs(x) > 1) {
             if (index < animatedValues.length) {
                 animatedValues[index].setValue(x);
             }
-            setIsDragging(true); // Set dragging state
-            setSwipeDirection(x > 0 ? 'right' : 'left'); // Set swipe direction
+            setIsDragging(true);
+            setSwipeDirection(x > 0 ? 'right' : 'left');
         } else {
-            setIsDragging(false); // Reset dragging state
-            setSwipeDirection(null); // Reset swipe direction
+            setIsDragging(false);
+            setSwipeDirection(null);
         }
     };
 
     const onSwipedAborted = (index) => {
         resetAnimatedValue(index);
-        setIsDragging(false); // Reset dragging state
-        setSwipeDirection(null); // Reset swipe direction
+        setIsDragging(false);
+        setSwipeDirection(null);
     };
 
     const interpolateGlowColor = (index) => animatedValues[index].interpolate({
         inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
-        outputRange: ['red', '#fff', 'green'], // Glow colors
+        outputRange: ['red', '#fff', 'green'],
         extrapolate: 'clamp'
     });
 
@@ -88,6 +113,7 @@ const IndexScreen = () => {
                 </TouchableOpacity>
             </View>
             <Swiper
+                ref={swiperRef} // Attach the reference to the Swiper component
                 cards={cards}
                 renderCard={(card, index) => {
                     const glowColor = interpolateGlowColor(index);
@@ -97,9 +123,9 @@ const IndexScreen = () => {
                             <Animated.View style={[styles.imageContainer, {
                                 shadowColor: glowColor,
                                 shadowOffset: { width: 0, height: 0 },
-                                shadowOpacity: 1.5, // Maximized for more vivid color visibility
-                                shadowRadius: 9, // Reduced for a sharper, less diffuse glow
-                                elevation: 5 // Adjusted elevation for Android to match the less diffuse glow
+                                shadowOpacity: 1.5,
+                                shadowRadius: 9,
+                                elevation: 5
                             }]}>
                                 <Image style={styles.image} source={card.image} />
                                 <LinearGradient
@@ -109,6 +135,17 @@ const IndexScreen = () => {
                                     <Text style={styles.name}>{card.name}</Text>
                                     <Text style={styles.bio}>{card.bio}</Text>
                                 </LinearGradient>
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity onPress={onSwipedLeft} style={styles.actionButton}>
+                                        <MaterialCommunityIcons name="close" size={25} color="#91760d" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.actionButton}>
+                                        <MaterialCommunityIcons name="dots-horizontal" size={25} color="#808080" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={onSwipedRight} style={styles.actionButton}>
+                                        <MaterialCommunityIcons name="check" size={25} color="#91760d" />
+                                    </TouchableOpacity>
+                                </View>
                             </Animated.View>
                         </View>
                     );
@@ -163,14 +200,15 @@ const styles = StyleSheet.create({
     imageContainer: {
         width: '100%',
         height: '100%',
-        borderRadius: 40, // This applies the border radius uniformly
-        overflow: 'visible', // Make sure this is set to visible to see the shadow
-        padding: 10, // Adjust if needed to give space for the shadow
+        borderRadius: 40,
+        overflow: 'visible',
+        padding: 10,
+        marginTop: -50,
     },
     image: {
         width: '100%',
         height: '100%',
-        borderRadius: 40, // Ensure the borderRadius here matches the container
+        borderRadius: 40,
     },
     gradientOverlay: {
         width: '100%',
@@ -180,8 +218,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        borderBottomLeftRadius: 40, // match this with the imageContainer borderRadius
-        borderBottomRightRadius: 40, // match this with the imageContainer borderRadius
+        borderBottomLeftRadius: 40,
+        borderBottomRightRadius: 40,
     },
     name: {
         fontSize: 24,
@@ -192,6 +230,19 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#fff',
         textAlign: 'center',
+    },
+    buttonContainer: {
+        position: 'absolute',
+        bottom: -25, // Adjust this value to position the buttons correctly
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingHorizontal: 20,
+    },
+    actionButton: {
+        backgroundColor: '#000',
+        borderRadius: 15,
+        padding: 5,
     }
 });
 
