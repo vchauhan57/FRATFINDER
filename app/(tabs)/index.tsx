@@ -137,13 +137,13 @@ const IndexScreen = () => {
                                 </LinearGradient>
                                 <View style={styles.buttonContainer}>
                                     <TouchableOpacity onPress={onSwipedLeft} style={styles.actionButton}>
-                                        <MaterialCommunityIcons name="close" size={25} color="#91760d" />
+                                        <MaterialCommunityIcons name="close" size={25} color="#808080" />
                                     </TouchableOpacity>
-                                    <TouchableOpacity style={styles.actionButton}>
-                                        <MaterialCommunityIcons name="dots-horizontal" size={25} color="#808080" />
+                                    <TouchableOpacity onPress={() => handleProfileTap(card)} style={styles.actionButton}>
+                                        <MaterialCommunityIcons name="account" size={25} color="#91760d" />
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={onSwipedRight} style={styles.actionButton}>
-                                        <MaterialCommunityIcons name="check" size={25} color="#91760d" />
+                                        <MaterialCommunityIcons name="check" size={25} color="#808080" />
                                     </TouchableOpacity>
                                 </View>
                             </Animated.View>
