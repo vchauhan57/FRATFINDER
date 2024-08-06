@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text, Image, Dimensions, Animated } from 'react-native';
+import { View, StyleSheet, Text, Image, Dimensions, Animated, TouchableOpacity } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDragging } from './DraggingContext';
-import { Modal, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const IndexScreen = () => {
     const initialCards = [
@@ -12,54 +13,57 @@ const IndexScreen = () => {
         { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg') },
         { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png') },
     ];
+
     const { setIsDragging, setSwipeDirection } = useDragging();
     const [cards, setCards] = useState(initialCards);
     const [cardIndex, setCardIndex] = useState(0);
     const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current;
-    const [modalVisible, setModalVisible] = useState(false);
-    const [selectedProfile, setSelectedProfile] = useState(null);
+    const navigation = useNavigation();
 
     useEffect(() => {
         if (cards.length !== animatedValues.length) {
             animatedValues.current = cards.map(() => new Animated.Value(0));
         }
-    }, [cards.length]);
+
+        if (cardIndex >= cards.length) {
+            setCardIndex(0);
+        }
+    }, [cardIndex, cards.length]);
 
     const onSwiped = (index) => {
         setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
         resetAnimatedValue(index);
-        setIsDragging(false);
-        setSwipeDirection(null);
-    };
-
-    const onSwiping = (x) => {
-        const index = cardIndex;
-        if (Math.abs(x) > 1) {
-            if (index < animatedValues.length) {
-                animatedValues[index].setValue(x);
-            }
-            setIsDragging(true);
-            setSwipeDirection(x > 0 ? 'right' : 'left');
-        } else {
-            setIsDragging(false);
-            setSwipeDirection(null);
-        }
-    };
-
-    const onSwipedAborted = () => {
-        resetAnimatedValue(cardIndex);
-        setIsDragging(false);
-        setSwipeDirection(null);
+        setIsDragging(false); // Reset dragging state
+        setSwipeDirection(null); // Reset swipe direction
     };
 
     const resetAnimatedValue = (index) => {
         if (index < animatedValues.length) {
             Animated.timing(animatedValues[index], {
                 toValue: 0,
-                duration: 0,
+                duration: 0, // Reset immediately
                 useNativeDriver: false,
             }).start();
         }
+    };
+
+    const onSwiping = (index, x) => {
+        if (Math.abs(x) > 1) { // Detect smaller movements earlier
+            if (index < animatedValues.length) {
+                animatedValues[index].setValue(x);
+            }
+            setIsDragging(true); // Set dragging state
+            setSwipeDirection(x > 0 ? 'right' : 'left'); // Set swipe direction
+        } else {
+            setIsDragging(false); // Reset dragging state
+            setSwipeDirection(null); // Reset swipe direction
+        }
+    };
+
+    const onSwipedAborted = (index) => {
+        resetAnimatedValue(index);
+        setIsDragging(false); // Reset dragging state
+        setSwipeDirection(null); // Reset swipe direction
     };
 
     const interpolateGlowColor = (index) => animatedValues[index].interpolate({
@@ -68,9 +72,21 @@ const IndexScreen = () => {
         extrapolate: 'clamp'
     });
 
+    const handleProfileTap = (profile) => {
+        navigation.navigate('ProfileDetail', { profile });
+    };
+
     return (
         <View style={styles.container}>
             <Text style={styles.logo}>fratch.</Text>
+            <View style={styles.iconContainer}>
+                <TouchableOpacity>
+                    <MaterialCommunityIcons name="filter" size={24} color="#808080" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.icon}>
+                    <MaterialCommunityIcons name="cog" size={24} color="#91760d" />
+                </TouchableOpacity>
+            </View>
             <Swiper
                 cards={cards}
                 renderCard={(card, index) => {
@@ -78,29 +94,28 @@ const IndexScreen = () => {
 
                     return (
                         <View style={styles.cardContainer}>
-              <Animated.View style={[styles.imageContainer, {
-    shadowColor: glowColor,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1, // Maximized for more vivid color visibility
-    shadowRadius: 5, // Reduced for a sharper, less diffuse glow
-    elevation: 5 // Adjusted elevation for Android to match the less diffuse glow
-}]}>
-    <Image style={styles.image} source={card.image} />
-    <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,1.1)']}
-        style={styles.gradientOverlay}
-    >
-        <Text style={styles.name}>{card.name}</Text>
-        <Text style={styles.bio}>{card.bio}</Text>
-    </LinearGradient>
-</Animated.View>
-
+                            <Animated.View style={[styles.imageContainer, {
+                                shadowColor: glowColor,
+                                shadowOffset: { width: 0, height: 0 },
+                                shadowOpacity: 1.5, // Maximized for more vivid color visibility
+                                shadowRadius: 9, // Reduced for a sharper, less diffuse glow
+                                elevation: 5 // Adjusted elevation for Android to match the less diffuse glow
+                            }]}>
+                                <Image style={styles.image} source={card.image} />
+                                <LinearGradient
+                                    colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,1.1)']}
+                                    style={styles.gradientOverlay}
+                                >
+                                    <Text style={styles.name}>{card.name}</Text>
+                                    <Text style={styles.bio}>{card.bio}</Text>
+                                </LinearGradient>
+                            </Animated.View>
                         </View>
                     );
                 }}
                 onSwiped={onSwiped}
-                onSwiping={(x) => onSwiping(x)}
-                onSwipedAborted={onSwipedAborted}
+                onSwiping={(x) => onSwiping(cardIndex, x)}
+                onSwipedAborted={() => onSwipedAborted(cardIndex)}
                 cardIndex={cardIndex}
                 infinite
                 backgroundColor={'transparent'}
@@ -129,6 +144,15 @@ const styles = StyleSheet.create({
         fontSize: 30,
         fontWeight: 'bold',
         color: '#91760d'
+    },
+    iconContainer: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        flexDirection: 'row',
+    },
+    icon: {
+        marginLeft: 15,
     },
     cardContainer: {
         justifyContent: 'center',
