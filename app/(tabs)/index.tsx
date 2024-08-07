@@ -17,8 +17,11 @@ const IndexScreen = () => {
     const { setIsDragging, setSwipeDirection } = useDragging();
     const [cards, setCards] = useState(initialCards);
     const [cardIndex, setCardIndex] = useState(0);
+    const [isDraggingLocal, setIsDraggingLocal] = useState(false);
+    const [isFlipped, setIsFlipped] = useState(false);
     const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current;
-    const swiperRef = useRef(null); // Create a reference to the Swiper component
+    const flipAnimation = useRef(new Animated.Value(0)).current;
+    const swiperRef = useRef(null);
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -34,19 +37,23 @@ const IndexScreen = () => {
     const onSwiped = (index) => {
         setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
         resetAnimatedValue(index);
+        setIsDraggingLocal(false);
         setIsDragging(false);
         setSwipeDirection(null);
+        setIsFlipped(false); // Reset flip state
+        flipAnimation.setValue(0); // Reset flip animation
     };
 
     const onSwipedLeft = () => {
         if (swiperRef.current) {
             setSwipeDirection('left');
             setIsDragging(true);
+            setIsDraggingLocal(true);
             swiperRef.current.swipeLeft();
             setTimeout(() => {
                 setIsDragging(false);
                 setSwipeDirection(null);
-            }, 500); // Adjust this value if needed
+            }, 500);
         }
     };
 
@@ -54,11 +61,12 @@ const IndexScreen = () => {
         if (swiperRef.current) {
             setSwipeDirection('right');
             setIsDragging(true);
+            setIsDraggingLocal(true);
             swiperRef.current.swipeRight();
             setTimeout(() => {
                 setIsDragging(false);
                 setSwipeDirection(null);
-            }, 500); // Adjust this value if needed
+            }, 500);
         }
     };
 
@@ -78,9 +86,11 @@ const IndexScreen = () => {
                 animatedValues[index].setValue(x);
             }
             setIsDragging(true);
+            setIsDraggingLocal(true);
             setSwipeDirection(x > 0 ? 'right' : 'left');
         } else {
             setIsDragging(false);
+            setIsDraggingLocal(false);
             setSwipeDirection(null);
         }
     };
@@ -88,6 +98,7 @@ const IndexScreen = () => {
     const onSwipedAborted = (index) => {
         resetAnimatedValue(index);
         setIsDragging(false);
+        setIsDraggingLocal(false);
         setSwipeDirection(null);
     };
 
@@ -97,8 +108,35 @@ const IndexScreen = () => {
         extrapolate: 'clamp'
     });
 
-    const handleProfileTap = (profile) => {
-        navigation.navigate('ProfileDetail', { profile });
+    const handleProfileTap = () => {
+        setIsFlipped(!isFlipped);
+        Animated.timing(flipAnimation, {
+            toValue: isFlipped ? 0 : 1,
+            duration: 500,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const frontAnimatedStyle = {
+        transform: [
+            {
+                rotateY: flipAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '180deg']
+                })
+            }
+        ]
+    };
+
+    const backAnimatedStyle = {
+        transform: [
+            {
+                rotateY: flipAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['180deg', '360deg']
+                })
+            }
+        ]
     };
 
     return (
@@ -113,19 +151,21 @@ const IndexScreen = () => {
                 </TouchableOpacity>
             </View>
             <Swiper
-                ref={swiperRef} // Attach the reference to the Swiper component
+                ref={swiperRef}
                 cards={cards}
                 renderCard={(card, index) => {
                     const glowColor = interpolateGlowColor(index);
 
                     return (
                         <View style={styles.cardContainer}>
-                            <Animated.View style={[styles.imageContainer, {
+                            <Animated.View style={[styles.imageContainer, frontAnimatedStyle, isDraggingLocal && {
                                 shadowColor: glowColor,
                                 shadowOffset: { width: 0, height: 0 },
                                 shadowOpacity: 1.5,
                                 shadowRadius: 9,
-                                elevation: 5
+                                elevation: 5,
+                            }, {
+                                backfaceVisibility: 'hidden'
                             }]}>
                                 <Image style={styles.image} source={card.image} />
                                 <LinearGradient
@@ -139,13 +179,29 @@ const IndexScreen = () => {
                                     <TouchableOpacity onPress={onSwipedLeft} style={styles.actionButton}>
                                         <MaterialCommunityIcons name="close" size={25} color="#808080" />
                                     </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => handleProfileTap(card)} style={styles.actionButton}>
+                                    <TouchableOpacity onPress={handleProfileTap} style={[styles.actionButton, styles.profileButton]}>
                                         <MaterialCommunityIcons name="account" size={25} color="#91760d" />
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={onSwipedRight} style={styles.actionButton}>
                                         <MaterialCommunityIcons name="check" size={25} color="#808080" />
                                     </TouchableOpacity>
                                 </View>
+                            </Animated.View>
+                            <Animated.View style={[styles.imageContainer, backAnimatedStyle, {
+                                backfaceVisibility: 'hidden',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                backgroundColor: '#fff',
+                                borderRadius: 40,
+                                padding: 20
+                            }]}>
+                                <Text style={styles.name}>{card.name}</Text>
+                                <Text style={styles.bio}>{card.bio}</Text>
                             </Animated.View>
                         </View>
                     );
@@ -196,6 +252,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: Dimensions.get('window').width - 50,
         height: Dimensions.get('window').height - 200,
+        marginLeft: 'auto',
+        marginRight: 'auto'
     },
     imageContainer: {
         width: '100%',
@@ -233,16 +291,21 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         position: 'absolute',
-        bottom: -25, // Adjust this value to position the buttons correctly
+        bottom: -25,
         width: '100%',
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
+        alignItems: 'center',
         paddingHorizontal: 20,
     },
     actionButton: {
         backgroundColor: '#000',
         borderRadius: 15,
         padding: 5,
+        marginHorizontal: 20,
+    },
+    profileButton: {
+        marginHorizontal: 20,
     }
 });
 
