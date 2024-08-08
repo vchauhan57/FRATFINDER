@@ -144,18 +144,15 @@ const IndexScreen = () => {
                     const glowColor = interpolateGlowColor(index);
                     return (
                         <View style={styles.cardContainer}>
-                            <Animated.View style={[
-                                styles.imageContainer,
-                                frontAnimatedStyle,
-                                {
-                                    shadowColor: glowColor,
-                                    shadowOffset: { width: 0, height: 0 },
-                                    shadowOpacity: 1.5,
-                                    shadowRadius: 9,
-                                    elevation: 5,
-                                    backfaceVisibility: 'hidden'
-                                }
-                            ]}>
+                            <Animated.View style={[styles.imageContainer, frontAnimatedStyle, isDraggingLocal && {
+                                shadowColor: glowColor,
+                                shadowOffset: { width: 0, height: 0 },
+                                shadowOpacity: 1.5,
+                                shadowRadius: 9,
+                                elevation: 5,
+                            }, {
+                                backfaceVisibility: 'hidden'
+                            }]}>
                                 <Image style={styles.image} source={card.image} />
                                 <LinearGradient
                                     colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,1.1)']}
@@ -216,7 +213,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F5F5F5',
+        backgroundColor: '#d7d7d7',
         paddingTop: 30
     },
     logo: {
