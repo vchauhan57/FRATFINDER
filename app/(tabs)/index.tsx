@@ -1,101 +1,106 @@
-import React, { useState, useEffect, useRef } from 'react'; // Import necessary hooks and components from React
-import { View, StyleSheet, Text, Image, Dimensions, Animated, TouchableOpacity } from 'react-native'; // Import necessary components from React Native
-import Swiper from 'react-native-deck-swiper'; // Import Swiper component
-import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient component
-import { useDragging } from './DraggingContext'; // Import useDragging hook from DraggingContext
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook from React Navigation
-import { MaterialCommunityIcons } from '@expo/vector-icons'; // Import icons from MaterialCommunityIcons
+import React, { useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, Text, Image, Dimensions, Animated, TouchableOpacity } from 'react-native';
+import Swiper from 'react-native-deck-swiper';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useDragging } from './DraggingContext';
+import { useNavigation } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const IndexScreen = () => {
-    const initialCards = [ // Initial card data
+    const initialCards = [
         { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg') },
         { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpg') },
         { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg') },
         { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png') },
     ];
 
-    const { setIsDragging, setSwipeDirection } = useDragging(); // Destructure setIsDragging and setSwipeDirection from useDragging hook
-    const [cards, setCards] = useState(initialCards); // State for cards
-    const [cardIndex, setCardIndex] = useState(0); // State for card index
-    const [isDraggingLocal, setIsDraggingLocal] = useState(false); // Local state for dragging
-    const [isFlipped, setIsFlipped] = useState(false); // State for flip animation
-    const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current; // Animated values for card animations
-    const flipAnimation = useRef(new Animated.Value(0)).current; // Animated value for flip animation
-    const swiperRef = useRef(null); // Ref for Swiper component
-    const navigation = useNavigation(); // Navigation hook
+    const { setIsDragging, setSwipeDirection } = useDragging();
+    const [cards, setCards] = useState(initialCards);
+    const [cardIndex, setCardIndex] = useState(0);
+    const [isDraggingLocal, setIsDraggingLocal] = useState(false);
+    const [isFlipped, setIsFlipped] = useState(false);
+    const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current;
+    const flipAnimation = useRef(new Animated.Value(0)).current;
+    const swiperRef = useRef(null);
+    const navigation = useNavigation();
 
     const onSwiped = (index) => {
-        setCardIndex(prevIndex => (prevIndex + 1) % cards.length); // Update card index on swipe
-        resetAnimatedValue(index); // Reset animated value on swipe
-        setIsDraggingLocal(false); // Reset local dragging state
-        setIsDragging(false); // Reset global dragging state
-        setSwipeDirection(null); // Reset swipe direction
-        setIsFlipped(false); // Reset flip state
-        flipAnimation.setValue(0); // Reset flip animation
+        setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
+        resetAnimatedValue(index);
+        setIsDraggingLocal(false);
+        setIsDragging(false);
+        setSwipeDirection(null);
+        setIsFlipped(false);
+        flipAnimation.setValue(0);
+        
+        // Reset the animated value for the next card
+        if (index + 1 < animatedValues.length) {
+            animatedValues[index + 1].setValue(0);
+        }
     };
 
     const onSwipedLeft = () => {
         if (swiperRef.current) {
-            setSwipeDirection('left'); // Set swipe direction to left
-            setIsDragging(true); // Set global dragging state to true
-            setIsDraggingLocal(true); // Set local dragging state to true
-            swiperRef.current.swipeLeft(); // Trigger swipe left
+            setSwipeDirection('left');
+            setIsDragging(true);
+            setIsDraggingLocal(true);
+            swiperRef.current.swipeLeft();
             setTimeout(() => {
-                setIsDragging(false); // Reset global dragging state
-                setSwipeDirection(null); // Reset swipe direction
-            }, 500); // Timeout for 500ms
+                setIsDragging(false);
+                setSwipeDirection(null);
+            }, 500);
         }
     };
 
     const onSwipedRight = () => {
         if (swiperRef.current) {
-            setSwipeDirection('right'); // Set swipe direction to right
-            setIsDragging(true); // Set global dragging state to true
-            setIsDraggingLocal(true); // Set local dragging state to true
-            swiperRef.current.swipeRight(); // Trigger swipe right
+            setSwipeDirection('right');
+            setIsDragging(true);
+            setIsDraggingLocal(true);
+            swiperRef.current.swipeRight();
             setTimeout(() => {
-                setIsDragging(false); // Reset global dragging state
-                setSwipeDirection(null); // Reset swipe direction
-            }, 500); // Timeout for 500ms
+                setIsDragging(false);
+                setSwipeDirection(null);
+            }, 500);
         }
     };
 
     const resetAnimatedValue = (index) => {
         if (index < animatedValues.length) {
             Animated.timing(animatedValues[index], {
-                toValue: 0, // Reset value to 0
-                duration: 0, // Immediate reset
+                toValue: 0,
+                duration: 0,
                 useNativeDriver: false,
             }).start();
         }
     };
 
     const onSwiping = (index, x) => {
-        animatedValues[index].setValue(x);
-        setIsDragging(true); // Set global dragging state to true
-        setIsDraggingLocal(true); // Set local dragging state to true
-        setSwipeDirection(x > 0 ? 'right' : 'left'); // Set swipe direction
+        animatedValues[index].setValue(x);  // Remove Math.abs()
+        setIsDragging(true);
+        setIsDraggingLocal(true);
+        setSwipeDirection(x > 0 ? 'right' : 'left');
     };
 
     const onSwipedAborted = (index) => {
-        resetAnimatedValue(index); // Reset animated value on swipe abort
-        setIsDragging(false); // Reset global dragging state
-        setIsDraggingLocal(false); // Reset local dragging state
-        setSwipeDirection(null); // Reset swipe direction
+        resetAnimatedValue(index);
+        setIsDragging(false);
+        setIsDraggingLocal(false);
+        setSwipeDirection(null);
     };
 
     const interpolateGlowColor = (index) => animatedValues[index].interpolate({
-        inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2], // Input range for interpolation
-        outputRange: ['red', '#fff', 'green'], // Output range for glow colors
-        extrapolate: 'clamp' // Clamp the interpolation
+        inputRange: [-Dimensions.get('window').width / 4, 0, Dimensions.get('window').width / 4],
+        outputRange: ['red', '#fff', 'green'],
+        extrapolate: 'clamp'
     });
 
     const handleProfileTap = () => {
-        setIsFlipped(!isFlipped); // Toggle flip state
+        setIsFlipped(!isFlipped);
         Animated.timing(flipAnimation, {
-            toValue: isFlipped ? 0 : 1, // Animate flip based on current state
-            duration: 500, // Duration of flip animation
-            useNativeDriver: true, // Use native driver for better performance
+            toValue: isFlipped ? 0 : 1,
+            duration: 500,
+            useNativeDriver: true,
         }).start();
     };
 
@@ -103,8 +108,8 @@ const IndexScreen = () => {
         transform: [
             {
                 rotateY: flipAnimation.interpolate({
-                    inputRange: [0, 1], // Input range for flip animation
-                    outputRange: ['0deg', '180deg'] // Output range for front side
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '180deg']
                 })
             }
         ]
@@ -114,8 +119,8 @@ const IndexScreen = () => {
         transform: [
             {
                 rotateY: flipAnimation.interpolate({
-                    inputRange: [0, 1], // Input range for flip animation
-                    outputRange: ['180deg', '360deg'] // Output range for back side
+                    inputRange: [0, 1],
+                    outputRange: ['180deg', '360deg']
                 })
             }
         ]
@@ -139,15 +144,18 @@ const IndexScreen = () => {
                     const glowColor = interpolateGlowColor(index);
                     return (
                         <View style={styles.cardContainer}>
-                            <Animated.View style={[styles.imageContainer, frontAnimatedStyle, isDraggingLocal && {
-                                shadowColor: glowColor,
-                                shadowOffset: { width: 0, height: 0 },
-                                shadowOpacity: 1.5,
-                                shadowRadius: 9,
-                                elevation: 5,
-                            }, {
-                                backfaceVisibility: 'hidden'
-                            }]}>
+                            <Animated.View style={[
+                                styles.imageContainer,
+                                frontAnimatedStyle,
+                                {
+                                    shadowColor: glowColor,
+                                    shadowOffset: { width: 0, height: 0 },
+                                    shadowOpacity: 1.5,
+                                    shadowRadius: 9,
+                                    elevation: 5,
+                                    backfaceVisibility: 'hidden'
+                                }
+                            ]}>
                                 <Image style={styles.image} source={card.image} />
                                 <LinearGradient
                                     colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,1.1)']}
@@ -188,7 +196,7 @@ const IndexScreen = () => {
                     );
                 }}
                 onSwiped={onSwiped}
-                onSwiping={(x) => onSwiping(cardIndex, x)}
+                onSwiping={(x, y) => onSwiping(cardIndex, x)}
                 onSwipedAborted={() => onSwipedAborted(cardIndex)}
                 cardIndex={cardIndex}
                 infinite
