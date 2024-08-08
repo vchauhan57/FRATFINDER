@@ -1,119 +1,101 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text, Image, Dimensions, Animated, TouchableOpacity } from 'react-native';
-import Swiper from 'react-native-deck-swiper';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useDragging } from './DraggingContext';
-import { useNavigation } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useState, useEffect, useRef } from 'react'; // Import necessary hooks and components from React
+import { View, StyleSheet, Text, Image, Dimensions, Animated, TouchableOpacity } from 'react-native'; // Import necessary components from React Native
+import Swiper from 'react-native-deck-swiper'; // Import Swiper component
+import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient component
+import { useDragging } from './DraggingContext'; // Import useDragging hook from DraggingContext
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook from React Navigation
+import { MaterialCommunityIcons } from '@expo/vector-icons'; // Import icons from MaterialCommunityIcons
 
 const IndexScreen = () => {
-    const initialCards = [
+    const initialCards = [ // Initial card data
         { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg') },
         { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpg') },
         { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg') },
         { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png') },
     ];
 
-    const { setIsDragging, setSwipeDirection } = useDragging();
-    const [cards, setCards] = useState(initialCards);
-    const [cardIndex, setCardIndex] = useState(0);
-    const [isDraggingLocal, setIsDraggingLocal] = useState(false);
-    const [isFlipped, setIsFlipped] = useState(false);
-    const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current;
-    const flipAnimation = useRef(new Animated.Value(0)).current;
-    const swiperRef = useRef(null);
-    const navigation = useNavigation();
-
-    useEffect(() => {
-        if (cards.length !== animatedValues.length) {
-            animatedValues.current = cards.map(() => new Animated.Value(0));
-        }
-
-        if (cardIndex >= cards.length) {
-            setCardIndex(0);
-        }
-    }, [cardIndex, cards.length]);
+    const { setIsDragging, setSwipeDirection } = useDragging(); // Destructure setIsDragging and setSwipeDirection from useDragging hook
+    const [cards, setCards] = useState(initialCards); // State for cards
+    const [cardIndex, setCardIndex] = useState(0); // State for card index
+    const [isDraggingLocal, setIsDraggingLocal] = useState(false); // Local state for dragging
+    const [isFlipped, setIsFlipped] = useState(false); // State for flip animation
+    const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current; // Animated values for card animations
+    const flipAnimation = useRef(new Animated.Value(0)).current; // Animated value for flip animation
+    const swiperRef = useRef(null); // Ref for Swiper component
+    const navigation = useNavigation(); // Navigation hook
 
     const onSwiped = (index) => {
-        setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
-        resetAnimatedValue(index);
-        setIsDraggingLocal(false);
-        setIsDragging(false);
-        setSwipeDirection(null);
+        setCardIndex(prevIndex => (prevIndex + 1) % cards.length); // Update card index on swipe
+        resetAnimatedValue(index); // Reset animated value on swipe
+        setIsDraggingLocal(false); // Reset local dragging state
+        setIsDragging(false); // Reset global dragging state
+        setSwipeDirection(null); // Reset swipe direction
         setIsFlipped(false); // Reset flip state
         flipAnimation.setValue(0); // Reset flip animation
     };
 
     const onSwipedLeft = () => {
         if (swiperRef.current) {
-            setSwipeDirection('left');
-            setIsDragging(true);
-            setIsDraggingLocal(true);
-            swiperRef.current.swipeLeft();
+            setSwipeDirection('left'); // Set swipe direction to left
+            setIsDragging(true); // Set global dragging state to true
+            setIsDraggingLocal(true); // Set local dragging state to true
+            swiperRef.current.swipeLeft(); // Trigger swipe left
             setTimeout(() => {
-                setIsDragging(false);
-                setSwipeDirection(null);
-            }, 500);
+                setIsDragging(false); // Reset global dragging state
+                setSwipeDirection(null); // Reset swipe direction
+            }, 500); // Timeout for 500ms
         }
     };
 
     const onSwipedRight = () => {
         if (swiperRef.current) {
-            setSwipeDirection('right');
-            setIsDragging(true);
-            setIsDraggingLocal(true);
-            swiperRef.current.swipeRight();
+            setSwipeDirection('right'); // Set swipe direction to right
+            setIsDragging(true); // Set global dragging state to true
+            setIsDraggingLocal(true); // Set local dragging state to true
+            swiperRef.current.swipeRight(); // Trigger swipe right
             setTimeout(() => {
-                setIsDragging(false);
-                setSwipeDirection(null);
-            }, 500);
+                setIsDragging(false); // Reset global dragging state
+                setSwipeDirection(null); // Reset swipe direction
+            }, 500); // Timeout for 500ms
         }
     };
 
     const resetAnimatedValue = (index) => {
         if (index < animatedValues.length) {
             Animated.timing(animatedValues[index], {
-                toValue: 0,
-                duration: 0,
+                toValue: 0, // Reset value to 0
+                duration: 0, // Immediate reset
                 useNativeDriver: false,
             }).start();
         }
     };
 
     const onSwiping = (index, x) => {
-        if (Math.abs(x) > 1) {
-            if (index < animatedValues.length) {
-                animatedValues[index].setValue(x);
-            }
-            setIsDragging(true);
-            setIsDraggingLocal(true);
-            setSwipeDirection(x > 0 ? 'right' : 'left');
-        } else {
-            setIsDragging(false);
-            setIsDraggingLocal(false);
-            setSwipeDirection(null);
-        }
+        animatedValues[index].setValue(x);
+        setIsDragging(true); // Set global dragging state to true
+        setIsDraggingLocal(true); // Set local dragging state to true
+        setSwipeDirection(x > 0 ? 'right' : 'left'); // Set swipe direction
     };
 
     const onSwipedAborted = (index) => {
-        resetAnimatedValue(index);
-        setIsDragging(false);
-        setIsDraggingLocal(false);
-        setSwipeDirection(null);
+        resetAnimatedValue(index); // Reset animated value on swipe abort
+        setIsDragging(false); // Reset global dragging state
+        setIsDraggingLocal(false); // Reset local dragging state
+        setSwipeDirection(null); // Reset swipe direction
     };
 
     const interpolateGlowColor = (index) => animatedValues[index].interpolate({
-        inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
-        outputRange: ['red', '#fff', 'green'],
-        extrapolate: 'clamp'
+        inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2], // Input range for interpolation
+        outputRange: ['red', '#fff', 'green'], // Output range for glow colors
+        extrapolate: 'clamp' // Clamp the interpolation
     });
 
     const handleProfileTap = () => {
-        setIsFlipped(!isFlipped);
+        setIsFlipped(!isFlipped); // Toggle flip state
         Animated.timing(flipAnimation, {
-            toValue: isFlipped ? 0 : 1,
-            duration: 500,
-            useNativeDriver: true,
+            toValue: isFlipped ? 0 : 1, // Animate flip based on current state
+            duration: 500, // Duration of flip animation
+            useNativeDriver: true, // Use native driver for better performance
         }).start();
     };
 
@@ -121,8 +103,8 @@ const IndexScreen = () => {
         transform: [
             {
                 rotateY: flipAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0deg', '180deg']
+                    inputRange: [0, 1], // Input range for flip animation
+                    outputRange: ['0deg', '180deg'] // Output range for front side
                 })
             }
         ]
@@ -132,8 +114,8 @@ const IndexScreen = () => {
         transform: [
             {
                 rotateY: flipAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['180deg', '360deg']
+                    inputRange: [0, 1], // Input range for flip animation
+                    outputRange: ['180deg', '360deg'] // Output range for back side
                 })
             }
         ]
@@ -155,7 +137,6 @@ const IndexScreen = () => {
                 cards={cards}
                 renderCard={(card, index) => {
                     const glowColor = interpolateGlowColor(index);
-
                     return (
                         <View style={styles.cardContainer}>
                             <Animated.View style={[styles.imageContainer, frontAnimatedStyle, isDraggingLocal && {
@@ -173,13 +154,12 @@ const IndexScreen = () => {
                                     style={styles.gradientOverlay}
                                 >
                                     <Text style={styles.name}>{card.name}</Text>
-                                    <Text style={styles.bio}>{card.bio}</Text>
                                 </LinearGradient>
                                 <View style={styles.buttonContainer}>
                                     <TouchableOpacity onPress={onSwipedLeft} style={styles.actionButton}>
                                         <MaterialCommunityIcons name="close" size={25} color="#808080" />
                                     </TouchableOpacity>
-                                    <TouchableOpacity onPress={handleProfileTap} style={[styles.actionButton, styles.profileButton]}>
+                                    <TouchableOpacity onPress={handleProfileTap} style={styles.actionButton}>
                                         <MaterialCommunityIcons name="account" size={25} color="#91760d" />
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={onSwipedRight} style={styles.actionButton}>
@@ -196,10 +176,11 @@ const IndexScreen = () => {
                                 bottom: 0,
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                backgroundColor: '#fff',
+                                backgroundColor: '#808080',
                                 borderRadius: 40,
-                                padding: 20
-                            }]}>
+                                padding: 10,
+                                marginTop: -50
+                            },]}>
                                 <Text style={styles.name}>{card.name}</Text>
                                 <Text style={styles.bio}>{card.bio}</Text>
                             </Animated.View>
@@ -212,8 +193,8 @@ const IndexScreen = () => {
                 cardIndex={cardIndex}
                 infinite
                 backgroundColor={'transparent'}
-                stackSize={3}
-                stackSeparation={15}
+                stackSize={4}
+                stackSeparation={0}
                 disableBottomSwipe
                 disableTopSwipe
                 containerStyle={{ marginTop: 50 }}
@@ -227,7 +208,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#050505',
+        backgroundColor: '#F5F5F5',
         paddingTop: 30
     },
     logo: {
@@ -304,9 +285,6 @@ const styles = StyleSheet.create({
         padding: 5,
         marginHorizontal: 20,
     },
-    profileButton: {
-        marginHorizontal: 20,
-    }
 });
 
 export default IndexScreen;
