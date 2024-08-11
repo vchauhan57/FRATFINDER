@@ -33,7 +33,6 @@ const IndexScreen = () => {
         setIsFlipped(false);
         flipAnimation.setValue(0);
         
-        // Reset the animated value for the next card
         if (index + 1 < animatedValues.length) {
             animatedValues[index + 1].setValue(0);
         }
@@ -76,7 +75,7 @@ const IndexScreen = () => {
     };
 
     const onSwiping = (index, x) => {
-        animatedValues[index].setValue(x);  // Remove Math.abs()
+        animatedValues[index].setValue(x);
         setIsDragging(true);
         setIsDraggingLocal(true);
         setSwipeDirection(x > 0 ? 'right' : 'left');
@@ -97,9 +96,10 @@ const IndexScreen = () => {
 
     const handleProfileTap = () => {
         setIsFlipped(!isFlipped);
-        Animated.timing(flipAnimation, {
+        Animated.spring(flipAnimation, {
             toValue: isFlipped ? 0 : 1,
-            duration: 500,
+            friction: 8,
+            tension: 10,
             useNativeDriver: true,
         }).start();
     };
@@ -160,17 +160,6 @@ const IndexScreen = () => {
                                 >
                                     <Text style={styles.name}>{card.name}</Text>
                                 </LinearGradient>
-                                <View style={styles.buttonContainer}>
-                                    <TouchableOpacity onPress={onSwipedLeft} style={styles.actionButton}>
-                                        <MaterialCommunityIcons name="close" size={25} color="#808080" />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={handleProfileTap} style={styles.actionButton}>
-                                        <MaterialCommunityIcons name="account" size={25} color="#91760d" />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={onSwipedRight} style={styles.actionButton}>
-                                        <MaterialCommunityIcons name="check" size={25} color="#808080" />
-                                    </TouchableOpacity>
-                                </View>
                             </Animated.View>
                             <Animated.View style={[styles.imageContainer, backAnimatedStyle, {
                                 backfaceVisibility: 'hidden',
@@ -181,12 +170,11 @@ const IndexScreen = () => {
                                 bottom: 0,
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                backgroundColor: '#808080',
+                                backgroundColor: '#f0f0f0',
                                 borderRadius: 40,
-                                padding: 10,
-                                marginTop: -50
-                            },]}>
-                                <Text style={styles.name}>{card.name}</Text>
+                                padding: 20,
+                            }]}>
+                                <Text style={[styles.name, {color: '#333'}]}>{card.name}</Text>
                                 <Text style={styles.bio}>{card.bio}</Text>
                             </Animated.View>
                         </View>
@@ -204,6 +192,17 @@ const IndexScreen = () => {
                 disableTopSwipe
                 containerStyle={{ marginTop: 50 }}
             />
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity onPress={onSwipedLeft} style={styles.actionButton}>
+                    <MaterialCommunityIcons name="close" size={25} color="#808080" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleProfileTap} style={styles.actionButton}>
+                    <MaterialCommunityIcons name="account" size={25} color="#91760d" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={onSwipedRight} style={styles.actionButton}>
+                    <MaterialCommunityIcons name="check" size={25} color="#808080" />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -245,9 +244,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         borderRadius: 40,
-        overflow: 'visible',
-        padding: 10,
-        marginTop: -50,
+        overflow: 'hidden',
     },
     image: {
         width: '100%',
@@ -272,12 +269,13 @@ const styles = StyleSheet.create({
     },
     bio: {
         fontSize: 18,
-        color: '#fff',
+        color: '#333',
         textAlign: 'center',
+        marginTop: 10,
     },
     buttonContainer: {
         position: 'absolute',
-        bottom: -25,
+        bottom: 30,
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -286,8 +284,8 @@ const styles = StyleSheet.create({
     },
     actionButton: {
         backgroundColor: '#000',
-        borderRadius: 15,
-        padding: 5,
+        borderRadius: 30,
+        padding: 15,
         marginHorizontal: 20,
     },
 });
