@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, StyleSheet, Text, Image, Dimensions, Animated, TouchableOpacity } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -89,7 +89,7 @@ const IndexScreen = () => {
     };
 
     const interpolateGlowColor = (index) => animatedValues[index].interpolate({
-        inputRange: [-Dimensions.get('window').width / 4, 0, Dimensions.get('window').width / 4],
+        inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
         outputRange: ['red', '#fff', 'green'],
         extrapolate: 'clamp'
     });
@@ -143,15 +143,15 @@ const IndexScreen = () => {
                 renderCard={(card, index) => {
                     const glowColor = interpolateGlowColor(index);
                     return (
-                        <View style={styles.cardContainer}>
-                            <Animated.View style={[styles.imageContainer, frontAnimatedStyle, isDraggingLocal && {
-                                shadowColor: glowColor,
-                                shadowOffset: { width: 0, height: 0 },
-                                shadowOpacity: 1.5,
-                                shadowRadius: 9,
-                                elevation: 5,
-                            }, {
-                                backfaceVisibility: 'hidden'
+                        <Animated.View style={[styles.cardContainer, {
+                            shadowColor: glowColor,
+                            shadowOffset: { width: 0, height: 0 },
+                            shadowOpacity: 1,
+                            shadowRadius: 10,
+                            elevation: 5,
+                        }]}>
+                            <Animated.View style={[styles.imageContainer, frontAnimatedStyle, {
+                                backfaceVisibility: 'hidden',
                             }]}>
                                 <Image style={styles.image} source={card.image} />
                                 <LinearGradient
@@ -177,7 +177,7 @@ const IndexScreen = () => {
                                 <Text style={[styles.name, {color: '#333'}]}>{card.name}</Text>
                                 <Text style={styles.bio}>{card.bio}</Text>
                             </Animated.View>
-                        </View>
+                        </Animated.View>
                     );
                 }}
                 onSwiped={onSwiped}
@@ -238,7 +238,8 @@ const styles = StyleSheet.create({
         width: Dimensions.get('window').width - 50,
         height: Dimensions.get('window').height - 200,
         marginLeft: 'auto',
-        marginRight: 'auto'
+        marginRight: 'auto',
+        borderRadius: 40,
     },
     imageContainer: {
         width: '100%',
