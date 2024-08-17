@@ -8,10 +8,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const IndexScreen = () => {
     const initialCards = [
-        { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg') },
-        { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpg') },
-        { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg') },
-        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png') },
+        { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg'), year: "Freshman" },
+        { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpg'), year: "Sophomore" },
+        { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg'), year: "Junior" },
+        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png'), year: "Freshman" },
     ];
 
     const { setIsDragging, setSwipeDirection } = useDragging();
@@ -158,7 +158,7 @@ const IndexScreen = () => {
                                     colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,1.1)']}
                                     style={styles.gradientOverlay}
                                 >
-                                    <Text style={styles.name}>{card.name}</Text>
+                                    <Text style={styles.name}>{card.name + ", " + card.year}</Text>
                                 </LinearGradient>
                             </Animated.View>
                             <Animated.View style={[styles.imageContainer, backAnimatedStyle, {
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#d7d7d7',
+        backgroundColor: '#e3d5ca',
         paddingTop: 30
     },
     logo: {
