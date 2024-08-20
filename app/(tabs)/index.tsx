@@ -5,24 +5,39 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDragging } from './DraggingContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { 
+  useFonts,
+  Montserrat_400Regular,
+  Montserrat_700Bold
+} from '@expo-google-fonts/montserrat';
 
 const IndexScreen = () => {
+    let [fontsLoaded] = useFonts({
+        Montserrat_400Regular,
+        Montserrat_700Bold,
+    });
+
     const initialCards = [
-        { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg'), year: "Freshman" },
-        { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpg'), year: "Sophomore" },
-        { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg'), year: "Junior" },
-        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png'), year: "Freshman" },
+        { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg'), year: "Freshman", isFlipped: false },
+        { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpg'), year: "Sophomore", isFlipped: false },
+        { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg'), year: "Junior", isFlipped: false },
+        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png'), year: "Freshman", isFlipped: false },
     ];
 
     const { setIsDragging, setSwipeDirection } = useDragging();
     const [cards, setCards] = useState(initialCards);
     const [cardIndex, setCardIndex] = useState(0);
     const [isDraggingLocal, setIsDraggingLocal] = useState(false);
-    const [isFlipped, setIsFlipped] = useState(false);
     const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current;
-    const flipAnimation = useRef(new Animated.Value(0)).current;
+    const [flipAnimations] = useState(() => 
+        initialCards.map(() => new Animated.Value(0))
+    );
     const swiperRef = useRef(null);
     const navigation = useNavigation();
+
+    if (!fontsLoaded) {
+        return null; // or a loading indicator
+    }
 
     const onSwiped = (index) => {
         setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
@@ -30,8 +45,11 @@ const IndexScreen = () => {
         setIsDraggingLocal(false);
         setIsDragging(false);
         setSwipeDirection(null);
-        setIsFlipped(false);
-        flipAnimation.setValue(0);
+        
+        const newCards = [...cards];
+        newCards[index].isFlipped = false;
+        setCards(newCards);
+        flipAnimations[index].setValue(0);
         
         if (index + 1 < animatedValues.length) {
             animatedValues[index + 1].setValue(0);
@@ -95,35 +113,16 @@ const IndexScreen = () => {
     });
 
     const handleProfileTap = () => {
-        setIsFlipped(!isFlipped);
-        Animated.spring(flipAnimation, {
-            toValue: isFlipped ? 0 : 1,
+        const newCards = [...cards];
+        newCards[cardIndex].isFlipped = !newCards[cardIndex].isFlipped;
+        setCards(newCards);
+
+        Animated.spring(flipAnimations[cardIndex], {
+            toValue: newCards[cardIndex].isFlipped ? 1 : 0,
             friction: 8,
             tension: 10,
             useNativeDriver: true,
         }).start();
-    };
-
-    const frontAnimatedStyle = {
-        transform: [
-            {
-                rotateY: flipAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0deg', '180deg']
-                })
-            }
-        ]
-    };
-
-    const backAnimatedStyle = {
-        transform: [
-            {
-                rotateY: flipAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['180deg', '360deg']
-                })
-            }
-        ]
     };
 
     return (
@@ -142,6 +141,28 @@ const IndexScreen = () => {
                 cards={cards}
                 renderCard={(card, index) => {
                     const glowColor = interpolateGlowColor(index);
+                    const frontAnimatedStyle = {
+                        transform: [
+                            {
+                                rotateY: flipAnimations[index].interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['0deg', '180deg']
+                                })
+                            }
+                        ]
+                    };
+
+                    const backAnimatedStyle = {
+                        transform: [
+                            {
+                                rotateY: flipAnimations[index].interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['180deg', '360deg']
+                                })
+                            }
+                        ]
+                    };
+
                     return (
                         <Animated.View style={[styles.cardContainer, {
                             shadowColor: glowColor,
@@ -158,7 +179,10 @@ const IndexScreen = () => {
                                     colors={['transparent', 'rgba(0,0,0,0.7)', 'rgba(0,0,0,0.9)', 'rgba(0,0,0,1.1)']}
                                     style={styles.gradientOverlay}
                                 >
-                                    <Text style={styles.name}>{card.name + ", " + card.year}</Text>
+                                    <View style={styles.textContainer}>
+                                        <Text style={styles.name}>{card.name}</Text>
+                                        <Text style={styles.year}>{card.year}</Text>
+                                    </View>
                                 </LinearGradient>
                             </Animated.View>
                             <Animated.View style={[styles.imageContainer, backAnimatedStyle, {
@@ -212,7 +236,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#e3d5ca',
+        backgroundColor: '#f4eee8',
         paddingTop: 30
     },
     logo: {
@@ -221,7 +245,8 @@ const styles = StyleSheet.create({
         left: 20,
         fontSize: 30,
         fontWeight: 'bold',
-        color: '#91760d'
+        color: '#91760d',
+        fontFamily: 'Montserrat_700Bold',
     },
     iconContainer: {
         position: 'absolute',
@@ -254,25 +279,35 @@ const styles = StyleSheet.create({
     },
     gradientOverlay: {
         width: '100%',
-        height: '30%',
+        height: '40%',
         position: 'absolute',
         bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'flex-end',
         padding: 20,
         borderBottomLeftRadius: 40,
         borderBottomRightRadius: 40,
     },
+    textContainer: {
+        alignItems: 'flex-start',
+        marginBottom: 60,
+    },
     name: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#fff',
+        fontFamily: 'Montserrat_700Bold',
+    },
+    year: {
+        fontSize: 18,
+        color: '#fff',
+        fontFamily: 'Montserrat_400Regular',
     },
     bio: {
         fontSize: 18,
         color: '#333',
         textAlign: 'center',
         marginTop: 10,
+        fontFamily: 'Montserrat_400Regular',
     },
     buttonContainer: {
         position: 'absolute',
