@@ -18,10 +18,10 @@ const IndexScreen = () => {
     });
 
     const initialCards = [
-        { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg'), year: "Freshman", isFlipped: false },
-        { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpg'), year: "Sophomore", isFlipped: false },
-        { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg'), year: "Junior", isFlipped: false },
-        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png'), year: "Freshman", isFlipped: false },
+        { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg'), flippedImage: require('../../assets/images/kendrick2.jpg'), year: "Freshman", isFlipped: false },
+        { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpg'), flippedImage: require('../../assets/images/steph2.jpg'), year: "Sophomore", isFlipped: false },
+        { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg'), flippedImage: require('../../assets/images/lebron2.jpg'), year: "Junior", isFlipped: false },
+        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png'), flippedImage: require('../../assets/images/abel2.jpg'), year: "Freshman", isFlipped: false },
     ];
 
     const { setIsDragging, setSwipeDirection } = useDragging();
@@ -198,6 +198,7 @@ const IndexScreen = () => {
                                 borderRadius: 40,
                                 padding: 20,
                             }]}>
+                                <Image source={card.flippedImage} style={styles.flippedImage} />
                                 <Text style={[styles.name, {color: '#333'}]}>{card.name}</Text>
                                 <Text style={styles.bio}>{card.bio}</Text>
                             </Animated.View>
@@ -277,6 +278,12 @@ const styles = StyleSheet.create({
         height: '100%',
         borderRadius: 40,
     },
+    flippedImage: {
+        width: '100%', 
+        height: 350,
+        borderRadius: 20,
+        marginBottom: 25,
+    },
     gradientOverlay: {
         width: '100%',
         height: '40%',
@@ -306,7 +313,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#333',
         textAlign: 'center',
-        marginTop: 10,
+        marginTop: 5,
         fontFamily: 'Montserrat_400Regular',
     },
     buttonContainer: {
