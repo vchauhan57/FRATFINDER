@@ -1,15 +1,15 @@
 {
   "expo": {
     "owner": "vchauhan57",
-    "name": "FratFinder",
+    "name": "fratch.",
     "slug": "FratFinder",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/homeIcon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/loading.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

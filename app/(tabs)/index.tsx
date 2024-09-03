@@ -160,7 +160,8 @@ const IndexScreen = () => {
                                     outputRange: ['180deg', '360deg']
                                 })
                             }
-                        ]
+                        ],
+                        backgroundColor: '#ffffff', // Slightly darker background
                     };
 
                     return (
@@ -186,22 +187,28 @@ const IndexScreen = () => {
                                 </LinearGradient>
                             </Animated.View>
                             <Animated.View style={[styles.imageContainer, backAnimatedStyle, {
-                                backfaceVisibility: 'hidden',
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                backgroundColor: '#f0f0f0',
-                                borderRadius: 40,
-                                padding: 20,
-                            }]}>
-                                <Image source={card.flippedImage} style={styles.flippedImage} />
-                                <Text style={[styles.name, {color: '#333'}]}>{card.name}</Text>
-                                <Text style={styles.bio}>{card.bio}</Text>
-                            </Animated.View>
+    backfaceVisibility: 'hidden',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    borderRadius: 40,
+    padding: 20,
+}]}>
+    <LinearGradient
+             colors={['#ffffff', '#f7e7c4', '#d8b877', '#705121']} // Lighter at the top, transitioning to a darker gold
+             locations={[0, 0.6, 0.85, 1]} // Smooth transition with the darker gold at the bottom
+        style={StyleSheet.absoluteFillObject}
+    />
+    <Image source={card.flippedImage} style={styles.flippedImage} resizeMode="contain" />
+    <View style={styles.flippedTextContainer}>
+        <Text style={[styles.name, {color: '#333'}]}>{card.name}</Text>
+        <Text style={[styles.bio, {textAlign: 'left'}]}>{card.bio}</Text>
+    </View>
+</Animated.View>
                         </Animated.View>
                     );
                 }}
@@ -237,7 +244,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f4eee8',
+        backgroundColor: '#2E4057',
         paddingTop: 30
     },
     logo: {
@@ -280,9 +287,15 @@ const styles = StyleSheet.create({
     },
     flippedImage: {
         width: '100%', 
-        height: 350,
+        height: '60%', // Reduced height to push image up
         borderRadius: 20,
-        marginBottom: 25,
+        marginTop: 40, // Add some top margin
+    },
+    flippedTextContainer: {
+        position: 'absolute',
+        bottom: 100, // Adjust this value to move text up or down
+        left: 20,
+        right: 20,
     },
     gradientOverlay: {
         width: '100%',
@@ -310,10 +323,10 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat_400Regular',
     },
     bio: {
-        fontSize: 18,
+        fontSize: 16,
         color: '#333',
         textAlign: 'center',
-        marginTop: 5,
+        marginTop: 10,
         fontFamily: 'Montserrat_400Regular',
     },
     buttonContainer: {
