@@ -114,11 +114,18 @@ const IndexScreen = () => {
         setSwipeDirection(null);
     };
 
-    const interpolateGlowColor = (index) => animatedValues[index].interpolate({
-        inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
-        outputRange: ['red', '#fff', 'green'],
-        extrapolate: 'clamp'
-    });
+    const interpolateGlowColor = (index) => {
+        if (isDraggingLocal) {
+            return animatedValues[index].interpolate({
+                inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
+                outputRange: ['red', '#fff', 'green'],
+                extrapolate: 'clamp'
+            });
+        } else {
+            return '#fff';  // Default color when not swiping
+        }
+    };
+    
 
     const handleProfileTap = () => {
         const newCards = [...cards];
@@ -145,41 +152,41 @@ const IndexScreen = () => {
                 </TouchableOpacity>
             </View>
             <Swiper
-                ref={swiperRef}
-                cards={cards}
-                renderCard={(card, index) => {
-                    const glowColor = interpolateGlowColor(index);
-                    const frontAnimatedStyle = {
-                        transform: [
-                            {
-                                rotateY: flipAnimations[index].interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: ['0deg', '180deg']
-                                })
-                            }
-                        ]
-                    };
+    ref={swiperRef}
+    cards={cards}
+    renderCard={(card, index) => {
+        const glowColor = isDraggingLocal ? interpolateGlowColor(index) : '#fff'; // Apply glow color only when dragging
+        const frontAnimatedStyle = {
+            transform: [
+                {
+                    rotateY: flipAnimations[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '180deg']
+                    })
+                }
+            ]
+        };
 
-                    const backAnimatedStyle = {
-                        transform: [
-                            {
-                                rotateY: flipAnimations[index].interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: ['180deg', '360deg']
-                                })
-                            }
-                        ],
-                        backgroundColor: '#ffffff', // Slightly darker background
-                    };
+        const backAnimatedStyle = {
+            transform: [
+                {
+                    rotateY: flipAnimations[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['180deg', '360deg']
+                    })
+                }
+            ],
+            backgroundColor: '#ffffff',
+        };
 
-                    return (
-                        <Animated.View style={[styles.cardContainer, {
-                            shadowColor: glowColor,
-                            shadowOffset: { width: 0, height: 0 },
-                            shadowOpacity: 1,
-                            shadowRadius: 6,
-                            elevation: 5,
-                        }]}>
+        return (
+            <Animated.View style={[styles.cardContainer, {
+                shadowColor: glowColor,
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: isDraggingLocal ? 1 : 0,  // Adjust opacity based on dragging
+                shadowRadius: 6,
+                elevation: 5,
+            }]}>
                             <Animated.View style={[styles.imageContainer, frontAnimatedStyle, {
                                 backfaceVisibility: 'hidden',
                             }]}>
@@ -252,7 +259,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#2E4057',
+        backgroundColor: '#162238',
         paddingTop: 30
     },
     logo: {

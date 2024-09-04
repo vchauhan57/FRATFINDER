@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, SafeAreaView } from 'react-native';
-import ChatService from '../services/ChatService';
+import ChatService from '../services/ChatService'; // Adjust the import path as needed
 
 export default function MessagesScreen() {
     const [chats, setChats] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        ChatService.subscribe(setChats);
-        return () => {
-            ChatService.unsubscribe(setChats); // Cleanup subscription on unmount
-        };
+        setChats(ChatService.getChats()); // Load chats on component mount
     }, []);
 
     const filteredChats = chats.filter(chat =>
@@ -31,6 +28,7 @@ export default function MessagesScreen() {
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 style={styles.searchBar}
+                placeholderTextColor="#4A90E2"  // Light blue placeholder text color
             />
             <FlatList
                 data={filteredChats}
@@ -44,6 +42,7 @@ export default function MessagesScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#162238',  // Dark navy blue background
         padding: 10,
     },
     searchBar: {
@@ -51,19 +50,22 @@ const styles = StyleSheet.create({
         margin: 10,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: '#4A90E2',  // Light blue border
+        backgroundColor: '#1E2F47',  // Slightly lighter blue for contrast
+        color: '#FFFFFF',  // White text color
     },
     chatItem: {
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
+        borderBottomColor: '#4A90E2',  // Light blue line
     },
     chatName: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: '#FFFFFF',  // White text color
     },
     lastMessage: {
         fontSize: 14,
-        color: '#666',
+        color: '#CCCCCC',  // Light gray for less important text
     },
 });
