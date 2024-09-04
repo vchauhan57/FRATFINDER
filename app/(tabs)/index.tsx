@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDragging } from './DraggingContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import ChatService from "../services/ChatService"
 import { 
   useFonts,
   Montserrat_400Regular,
@@ -75,12 +76,19 @@ const IndexScreen = () => {
             setIsDragging(true);
             setIsDraggingLocal(true);
             swiperRef.current.swipeRight();
+            initiateChat(cards[cardIndex]); // Function to start a chat
             setTimeout(() => {
                 setIsDragging(false);
                 setSwipeDirection(null);
             }, 500);
         }
     };
+    
+    const initiateChat = (user) => {
+        // Assuming ChatService has a function to handle new chats
+        ChatService.startChatWithUser(user);
+    };
+    
 
     const resetAnimatedValue = (index) => {
         if (index < animatedValues.length) {
@@ -169,7 +177,7 @@ const IndexScreen = () => {
                             shadowColor: glowColor,
                             shadowOffset: { width: 0, height: 0 },
                             shadowOpacity: 1,
-                            shadowRadius: 10,
+                            shadowRadius: 6,
                             elevation: 5,
                         }]}>
                             <Animated.View style={[styles.imageContainer, frontAnimatedStyle, {
@@ -244,7 +252,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#2E4057',
+        backgroundColor: '#162238',
         paddingTop: 30
     },
     logo: {
