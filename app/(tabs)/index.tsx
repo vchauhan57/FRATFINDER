@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#162238',
+        backgroundColor: '#2E4057',
         paddingTop: 30
     },
     logo: {
