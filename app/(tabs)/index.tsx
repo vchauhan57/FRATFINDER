@@ -19,10 +19,14 @@ const IndexScreen = () => {
     });
 
     const initialCards = [
-        { id: 1, name: "Kendrick Lamar", bio: "Engineering Major at XYZ University. Enjoys hiking and outdoor activities.", image: require('../../assets/images/kendrick.jpg'), flippedImage: require('../../assets/images/kendrick2.jpg'), year: "Freshman", isFlipped: false },
-        { id: 2, name: "Stephen Curry", bio: "Biology Major at XYZ University. Loves painting and photography.", image: require('../../assets/images/steph.jpg'), flippedImage: require('../../assets/images/steph2.jpg'), year: "Sophomore", isFlipped: false },
-        { id: 3, name: "LeBron James", bio: "You are my sunshine!", image: require('../../assets/images/lebron.jpg'), flippedImage: require('../../assets/images/lebron2.jpg'), year: "Junior", isFlipped: false },
-        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching", image: require('../../assets/images/abel.png'), flippedImage: require('../../assets/images/abel2.jpg'), year: "Freshman", isFlipped: false },
+        { id: 1, name: "Kendrick Lamar", bio: "The name is Kdot and I love to rap. When I start rapping I can't stop ending Drake's career. At the Super Bowl, I'm there.", image: require('../../assets/images/kendrick.jpg'), flippedImage: require('../../assets/images/kendrick2.jpg'), year: "Freshman", isFlipped: false,         major: "Engineering",
+            hobbies: ["hiking", "photography"] },
+        { id: 2, name: "Stephen Curry", bio: "My team sucks, my team sucks, and my team sucks. The splash bros just became the splash brother, and I have to deal with Looney's ass for anoher year.", image: require('../../assets/images/steph.jpg'), flippedImage: require('../../assets/images/steph2.jpg'), year: "Sophomore", isFlipped: false,         major: "Biology",
+            hobbies: ["painting", "photography"] },
+        { id: 3, name: "LeBron James", bio: "I'm boutta crash out on Anthony Davis if he sits out another game with a jammed finger. I'm tired of this shit I'm almost 40.", image: require('../../assets/images/lebron.jpg'), flippedImage: require('../../assets/images/lebron2.jpg'), year: "Junior", isFlipped: false,         major: "Business",
+            hobbies: ["basketball", "volunteering"] },
+        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching. Except my brother Kendrick, he's always watching cause he can never get sum.", image: require('../../assets/images/abel.png'), flippedImage: require('../../assets/images/abel2.jpg'), year: "Freshman", isFlipped: false,         major: "Music Production",
+            hobbies: ["music production", "fashion"] },
     ];
 
     const { setIsDragging, setSwipeDirection } = useDragging();
@@ -76,7 +80,7 @@ const IndexScreen = () => {
             setIsDragging(true);
             setIsDraggingLocal(true);
             swiperRef.current.swipeRight();
-            initiateChat(cards[cardIndex]); // Function to start a chat
+            initiateChat(cards[cardIndex]);
             setTimeout(() => {
                 setIsDragging(false);
                 setSwipeDirection(null);
@@ -85,9 +89,9 @@ const IndexScreen = () => {
     };
     
     const initiateChat = (user) => {
-        // Assuming ChatService has a function to handle new chats
         ChatService.startChatWithUser(user);
     };
+
     
 
     const resetAnimatedValue = (index) => {
@@ -210,18 +214,23 @@ const IndexScreen = () => {
     bottom: 0,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    borderRadius: 40,
-    padding: 20,
+    borderRadius: 20,
 }]}>
-    <LinearGradient
-             colors={['#ffffff', '#f7e7c4', '#d8b877', '#705121']} // Lighter at the top, transitioning to a darker gold
-             locations={[0, 0.6, 0.85, 1]} // Smooth transition with the darker gold at the bottom
+     <LinearGradient
+             colors={['#705121', '#162238', '#162238', '#705121']} // Lighter at the top, transitioning to a darker gold
+             locations={[0, 0.15, 0.85, 1]} // Smooth transition with the darker gold at the bottom
         style={StyleSheet.absoluteFillObject}
     />
     <Image source={card.flippedImage} style={styles.flippedImage} resizeMode="contain" />
     <View style={styles.flippedTextContainer}>
-        <Text style={[styles.name, {color: '#333'}]}>{card.name}</Text>
-        <Text style={[styles.bio, {textAlign: 'left'}]}>{card.bio}</Text>
+        <Text style={styles.sectionHeader}>About</Text>
+        <Text style={styles.textEntry}>{card.bio}</Text>
+        <View style={styles.divider}></View>
+        <Text style={styles.sectionHeader}>Major</Text>
+        <Text style={styles.textEntry}>{card.major}</Text>
+        <View style={styles.divider}></View>
+        <Text style={styles.sectionHeader}>Hobbies</Text>
+        <Text style={styles.textEntry}>{card.hobbies.join(', ')}</Text>
     </View>
 </Animated.View>
                         </Animated.View>
@@ -262,6 +271,24 @@ const styles = StyleSheet.create({
         backgroundColor: '#162238',
         paddingTop: 30
     },
+    divider: {
+        borderBottomColor: '#444',  // Subtle divider color
+        borderBottomWidth: 1,       // Just a hairline
+        marginVertical: 8,          // Space around the divider
+    },
+    textEntry: {
+        fontSize: 16,
+        color: '#E5C19E',         // Lighter text for bio
+        lineHeight: 24,        // Increased line height for readability
+        marginBottom: 10,      // Space between sections
+    },
+    sectionHeader: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#D8C3A5',         // White headers
+        paddingVertical: 5,    // Space between header and text
+        marginTop:-5,
+    },
     logo: {
         position: 'absolute',
         top: 50,
@@ -301,16 +328,17 @@ const styles = StyleSheet.create({
         borderRadius: 40,
     },
     flippedImage: {
-        width: '100%', 
-        height: '60%', // Reduced height to push image up
-        borderRadius: 20,
-        marginTop: 40, // Add some top margin
+        width: '70%',  // Reducing the width to 80% of the container width
+        height: '40%',   // Fixed height for all images
+        alignSelf: 'center',  // Centering the image within its container
+        marginTop: 20,  // Top margin to space it from the top of the card
+        borderRadius: 70,  // Adjusting borderRadius to a sensible value for slight rounding
     },
     flippedTextContainer: {
-        position: 'absolute',
-        bottom: 100, // Adjust this value to move text up or down
-        left: 20,
-        right: 20,
+        flex: 1,
+        paddingHorizontal: 20,  // Horizontal padding
+        paddingTop: 10,          // Space below the image
+        paddingBottom: 20,       // Space above the buttons
     },
     gradientOverlay: {
         width: '100%',

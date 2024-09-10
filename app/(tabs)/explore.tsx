@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, SafeAreaView } from 'react-native';
-import ChatService from '../services/ChatService'; // Adjust the import path as needed
+import ChatService from '../services/ChatService';
 
 export default function MessagesScreen() {
     const [chats, setChats] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        setChats(ChatService.getChats()); // Load chats on component mount
+        setChats(ChatService.getChats());
+        
+        const unsubscribe = ChatService.subscribe((updatedChats) => {
+            setChats(updatedChats);
+        });
+
+        return () => {
+            unsubscribe();
+        };
     }, []);
 
     const filteredChats = chats.filter(chat =>
@@ -28,7 +36,7 @@ export default function MessagesScreen() {
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 style={styles.searchBar}
-                placeholderTextColor="#4A90E2"  // Light blue placeholder text color
+                placeholderTextColor="#4A90E2"
             />
             <FlatList
                 data={filteredChats}
