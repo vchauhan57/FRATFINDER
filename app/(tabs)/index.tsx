@@ -19,20 +19,15 @@ const IndexScreen = () => {
     });
 
     const initialCards = [
-        { id: 1, name: "Kendrick Lamar", bio: "The name is Kdot and I love to rap. When I start rapping I can't stop ending Drake's career. At the Super Bowl, I'm there.", image: require('../../assets/images/kendrick.jpg'), flippedImage: require('../../assets/images/kendrick2.jpg'), year: "Freshman", isFlipped: false,         major: "Engineering",
-            hobbies: ["hiking", "photography"] },
-        { id: 2, name: "Stephen Curry", bio: "My team sucks, my team sucks, and my team sucks. The splash bros just became the splash brother, and I have to deal with Looney's ass for anoher year.", image: require('../../assets/images/steph.jpg'), flippedImage: require('../../assets/images/steph2.jpg'), year: "Sophomore", isFlipped: false,         major: "Biology",
-            hobbies: ["painting", "photography"] },
-        { id: 3, name: "LeBron James", bio: "I'm boutta crash out on Anthony Davis if he sits out another game with a jammed finger. I'm tired of this shit I'm almost 40.", image: require('../../assets/images/lebron.jpg'), flippedImage: require('../../assets/images/lebron2.jpg'), year: "Junior", isFlipped: false,         major: "Business",
-            hobbies: ["basketball", "volunteering"] },
-        { id: 4, name: "Abel Tesfaye", bio: "We had s*x in the studio, nobody's watching. Except my brother Kendrick, he's always watching cause he can never get sum.", image: require('../../assets/images/abel.png'), flippedImage: require('../../assets/images/abel2.jpg'), year: "Freshman", isFlipped: false,         major: "Music Production",
-            hobbies: ["music production", "fashion"] },
+        { id: 1, name: "Kendrick Lamar", bio: "The name is Kdot and I love to rap. When I start rapping I can't stop ending Drake's career. At the Super Bowl, I'm there.", image: require('../../assets/images/kendrick.jpg'), flippedImage: require('../../assets/images/kendrick2.jpg'), year: "Freshman", isFlipped: false, major: "Engineering", hobbies: ["hiking", "photography"] },
+        { id: 2, name: "Stephen Curry", bio: "I own king james and the lakers. I am better than any laker all time", image: require('../../assets/images/steph.jpg'), flippedImage: require('../../assets/images/steph2.jpg'), year: "Sophomore", isFlipped: false, major: "Biology", hobbies: ["painting", "photography"] },
+        { id: 3, name: "LeBron James", bio: "I'm boutta crash out on Anthony Davis if he sits out another game with a jammed finger. I'm tired of this shit I'm almost 40.", image: require('../../assets/images/lebron.jpg'), flippedImage: require('../../assets/images/lebron2.jpg'), year: "Junior", isFlipped: false, major: "Business", hobbies: ["basketball", "volunteering"] },
+        { id: 4, name: "Abel Tesfaye", bio: "I have a bottom 5 voice of all time!!! FUCK YEAH!!!", image: require('../../assets/images/abel.png'), flippedImage: require('../../assets/images/abel2.jpg'), year: "Freshman", isFlipped: false, major: "Music Production", hobbies: ["music production", "fashion"] },
     ];
 
     const { setIsDragging, setSwipeDirection } = useDragging();
     const [cards, setCards] = useState(initialCards);
     const [cardIndex, setCardIndex] = useState(0);
-    const [isDraggingLocal, setIsDraggingLocal] = useState(false);
     const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current;
     const [flipAnimations] = useState(() => 
         initialCards.map(() => new Animated.Value(0))
@@ -47,7 +42,6 @@ const IndexScreen = () => {
     const onSwiped = (index) => {
         setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
         resetAnimatedValue(index);
-        setIsDraggingLocal(false);
         setIsDragging(false);
         setSwipeDirection(null);
         
@@ -65,7 +59,6 @@ const IndexScreen = () => {
         if (swiperRef.current) {
             setSwipeDirection('left');
             setIsDragging(true);
-            setIsDraggingLocal(true);
             swiperRef.current.swipeLeft();
             setTimeout(() => {
                 setIsDragging(false);
@@ -78,7 +71,6 @@ const IndexScreen = () => {
         if (swiperRef.current) {
             setSwipeDirection('right');
             setIsDragging(true);
-            setIsDraggingLocal(true);
             swiperRef.current.swipeRight();
             initiateChat(cards[cardIndex]);
             setTimeout(() => {
@@ -91,8 +83,6 @@ const IndexScreen = () => {
     const initiateChat = (user) => {
         ChatService.startChatWithUser(user);
     };
-
-    
 
     const resetAnimatedValue = (index) => {
         if (index < animatedValues.length) {
@@ -107,29 +97,30 @@ const IndexScreen = () => {
     const onSwiping = (index, x) => {
         animatedValues[index].setValue(x);
         setIsDragging(true);
-        setIsDraggingLocal(true);
         setSwipeDirection(x > 0 ? 'right' : 'left');
     };
 
     const onSwipedAborted = (index) => {
         resetAnimatedValue(index);
         setIsDragging(false);
-        setIsDraggingLocal(false);
         setSwipeDirection(null);
     };
 
-    const interpolateGlowColor = (index) => {
-        if (isDraggingLocal) {
-            return animatedValues[index].interpolate({
-                inputRange: [-Dimensions.get('window').width / 2, 0, Dimensions.get('window').width / 2],
-                outputRange: ['red', '#fff', 'green'],
-                extrapolate: 'clamp'
-            });
-        } else {
-            return '#fff';  // Default color when not swiping
-        }
+    const interpolateGlowColor = (x) => {
+        return x.interpolate({
+            inputRange: [-100, -50, 0, 50, 100],
+            outputRange: ['red', 'red', 'transparent', 'green', 'green'],
+            extrapolate: 'clamp'
+        });
     };
-    
+
+    const interpolateGlowOpacity = (x) => {
+        return x.interpolate({
+            inputRange: [-100, -50, 0, 50, 100],
+            outputRange: [1, 1, 0, 1, 1],
+            extrapolate: 'clamp'
+        });
+    };
 
     const handleProfileTap = () => {
         const newCards = [...cards];
@@ -156,41 +147,43 @@ const IndexScreen = () => {
                 </TouchableOpacity>
             </View>
             <Swiper
-    ref={swiperRef}
-    cards={cards}
-    renderCard={(card, index) => {
-        const glowColor = isDraggingLocal ? interpolateGlowColor(index) : '#fff'; // Apply glow color only when dragging
-        const frontAnimatedStyle = {
-            transform: [
-                {
-                    rotateY: flipAnimations[index].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '180deg']
-                    })
-                }
-            ]
-        };
+                ref={swiperRef}
+                cards={cards}
+                renderCard={(card, index) => {
+                    const isTopCard = index === cardIndex;
+                    const glowColor = isTopCard ? interpolateGlowColor(animatedValues[index]) : 'transparent';
+                    const glowOpacity = isTopCard ? interpolateGlowOpacity(animatedValues[index]) : 0;
+                    const frontAnimatedStyle = {
+                        transform: [
+                            {
+                                rotateY: flipAnimations[index].interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['0deg', '180deg']
+                                })
+                            }
+                        ]
+                    };
 
-        const backAnimatedStyle = {
-            transform: [
-                {
-                    rotateY: flipAnimations[index].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['180deg', '360deg']
-                    })
-                }
-            ],
-            backgroundColor: '#ffffff',
-        };
+                    const backAnimatedStyle = {
+                        transform: [
+                            {
+                                rotateY: flipAnimations[index].interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['180deg', '360deg']
+                                })
+                            }
+                        ],
+                        backgroundColor: '#ffffff',
+                    };
 
-        return (
-            <Animated.View style={[styles.cardContainer, {
-                shadowColor: glowColor,
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: isDraggingLocal ? 1 : 0,  // Adjust opacity based on dragging
-                shadowRadius: 6,
-                elevation: 5,
-            }]}>
+                    return (
+                        <Animated.View style={[styles.cardContainer, {
+                            shadowColor: glowColor,
+                            shadowOffset: { width: 0, height: 0 },
+                            shadowOpacity: glowOpacity,
+                            shadowRadius: 10,
+                            elevation: isTopCard ? 5 : 0,
+                        }]}>
                             <Animated.View style={[styles.imageContainer, frontAnimatedStyle, {
                                 backfaceVisibility: 'hidden',
                             }]}>
@@ -206,33 +199,35 @@ const IndexScreen = () => {
                                 </LinearGradient>
                             </Animated.View>
                             <Animated.View style={[styles.imageContainer, backAnimatedStyle, {
-    backfaceVisibility: 'hidden',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    borderRadius: 20,
-}]}>
-     <LinearGradient
-             colors={['#705121', '#162238', '#162238', '#705121']} // Lighter at the top, transitioning to a darker gold
-             locations={[0, 0.15, 0.85, 1]} // Smooth transition with the darker gold at the bottom
-        style={StyleSheet.absoluteFillObject}
-    />
-    <Image source={card.flippedImage} style={styles.flippedImage} resizeMode="contain" />
-    <View style={styles.flippedTextContainer}>
-        <Text style={styles.sectionHeader}>About</Text>
-        <Text style={styles.textEntry}>{card.bio}</Text>
-        <View style={styles.divider}></View>
-        <Text style={styles.sectionHeader}>Major</Text>
-        <Text style={styles.textEntry}>{card.major}</Text>
-        <View style={styles.divider}></View>
-        <Text style={styles.sectionHeader}>Hobbies</Text>
-        <Text style={styles.textEntry}>{card.hobbies.join(', ')}</Text>
-    </View>
-</Animated.View>
+                                backfaceVisibility: 'hidden',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                justifyContent: 'flex-start',
+                                alignItems: 'center',
+                                borderRadius: 20,
+                            }]}>
+                                <LinearGradient
+                                    colors={['#705121', '#162238', '#162238', '#705121']}
+                                    locations={[0, 0.15, 0.85, 1]}
+                                    style={StyleSheet.absoluteFillObject}
+                                />
+                                <View style={styles.flippedImageContainer}>
+                                    <Image source={card.flippedImage} style={styles.flippedImage} resizeMode="cover" />
+                                </View>
+                                <View style={styles.flippedTextContainer}>
+                                    <Text style={styles.sectionHeader}>About</Text>
+                                    <Text style={styles.textEntry}>{card.bio}</Text>
+                                    <View style={styles.divider}></View>
+                                    <Text style={styles.sectionHeader}>Major</Text>
+                                    <Text style={styles.textEntry}>{card.major}</Text>
+                                    <View style={styles.divider}></View>
+                                    <Text style={styles.sectionHeader}>Hobbies</Text>
+                                    <Text style={styles.textEntry}>{card.hobbies.join(', ')}</Text>
+                                </View>
+                            </Animated.View>
                         </Animated.View>
                     );
                 }}
@@ -272,22 +267,22 @@ const styles = StyleSheet.create({
         paddingTop: 30
     },
     divider: {
-        borderBottomColor: '#444',  // Subtle divider color
-        borderBottomWidth: 1,       // Just a hairline
-        marginVertical: 8,          // Space around the divider
+        borderBottomColor: '#444',
+        borderBottomWidth: 1,
+        marginVertical: 8,
     },
     textEntry: {
         fontSize: 16,
-        color: '#E5C19E',         // Lighter text for bio
-        lineHeight: 24,        // Increased line height for readability
-        marginBottom: 10,      // Space between sections
+        color: '#E5C19E',
+        lineHeight: 24,
+        marginBottom: 10,
     },
     sectionHeader: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#D8C3A5',         // White headers
-        paddingVertical: 5,    // Space between header and text
-        marginTop:-5,
+        color: '#D8C3A5',
+        paddingVertical: 5,
+        marginTop: 5,
     },
     logo: {
         position: 'absolute',
@@ -327,18 +322,23 @@ const styles = StyleSheet.create({
         height: '100%',
         borderRadius: 40,
     },
+    flippedImageContainer: {
+        width: '80%',
+        height: '40%',
+        marginTop: 20,
+        borderRadius: 20,
+        overflow: 'hidden',
+    },
     flippedImage: {
-        width: '70%',  // Reducing the width to 80% of the container width
-        height: '40%',   // Fixed height for all images
-        alignSelf: 'center',  // Centering the image within its container
-        marginTop: 20,  // Top margin to space it from the top of the card
-        borderRadius: 70,  // Adjusting borderRadius to a sensible value for slight rounding
+        width: '100%',
+        height: '100%',
     },
     flippedTextContainer: {
         flex: 1,
-        paddingHorizontal: 20,  // Horizontal padding
-        paddingTop: 10,          // Space below the image
-        paddingBottom: 20,       // Space above the buttons
+        width: '100%',
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        paddingBottom: 20,
     },
     gradientOverlay: {
         width: '100%',

@@ -12,7 +12,7 @@ class ChatService {
         const newChat = {
             id: user.id,
             userName: user.name,
-            lastMessage: "Say hi!",
+            lastMessage: "Say Hi!",
         };
         this.chats.push(newChat);
         this.notify();
