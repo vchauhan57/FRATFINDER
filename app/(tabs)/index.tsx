@@ -5,12 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDragging } from './DraggingContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import ChatService from "../services/ChatService"
-import { 
-  useFonts,
-  Montserrat_400Regular,
-  Montserrat_700Bold
-} from '@expo-google-fonts/montserrat';
+import ChatService from "../services/ChatService";
+import { useFonts, Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 
 const IndexScreen = () => {
     let [fontsLoaded] = useFonts({
@@ -29,9 +25,7 @@ const IndexScreen = () => {
     const [cards, setCards] = useState(initialCards);
     const [cardIndex, setCardIndex] = useState(0);
     const animatedValues = useRef(initialCards.map(() => new Animated.Value(0))).current;
-    const [flipAnimations] = useState(() => 
-        initialCards.map(() => new Animated.Value(0))
-    );
+    const [flipAnimations] = useState(() => initialCards.map(() => new Animated.Value(0)));
     const swiperRef = useRef(null);
     const navigation = useNavigation();
 
@@ -40,16 +34,16 @@ const IndexScreen = () => {
     }
 
     const onSwiped = (index) => {
-        setCardIndex(prevIndex => (prevIndex + 1) % cards.length);
+        setCardIndex((prevIndex) => (prevIndex + 1) % cards.length);
         resetAnimatedValue(index);
         setIsDragging(false);
         setSwipeDirection(null);
-        
+
         const newCards = [...cards];
         newCards[index].isFlipped = false;
         setCards(newCards);
         flipAnimations[index].setValue(0);
-        
+
         if (index + 1 < animatedValues.length) {
             animatedValues[index + 1].setValue(0);
         }
@@ -79,7 +73,7 @@ const IndexScreen = () => {
             }, 500);
         }
     };
-    
+
     const initiateChat = (user) => {
         ChatService.startChatWithUser(user);
     };
@@ -110,7 +104,7 @@ const IndexScreen = () => {
         return x.interpolate({
             inputRange: [-100, -50, 0, 50, 100],
             outputRange: ['red', 'red', 'transparent', 'green', 'green'],
-            extrapolate: 'clamp'
+            extrapolate: 'clamp',
         });
     };
 
@@ -118,7 +112,7 @@ const IndexScreen = () => {
         return x.interpolate({
             inputRange: [-100, -50, 0, 50, 100],
             outputRange: [1, 1, 0, 1, 1],
-            extrapolate: 'clamp'
+            extrapolate: 'clamp',
         });
     };
 
@@ -158,10 +152,10 @@ const IndexScreen = () => {
                             {
                                 rotateY: flipAnimations[index].interpolate({
                                     inputRange: [0, 1],
-                                    outputRange: ['0deg', '180deg']
-                                })
-                            }
-                        ]
+                                    outputRange: ['0deg', '180deg'],
+                                }),
+                            },
+                        ],
                     };
 
                     const backAnimatedStyle = {
@@ -169,9 +163,9 @@ const IndexScreen = () => {
                             {
                                 rotateY: flipAnimations[index].interpolate({
                                     inputRange: [0, 1],
-                                    outputRange: ['180deg', '360deg']
-                                })
-                            }
+                                    outputRange: ['180deg', '360deg'],
+                                }),
+                            },
                         ],
                         backgroundColor: '#ffffff',
                     };
@@ -184,6 +178,7 @@ const IndexScreen = () => {
                             shadowRadius: 10,
                             elevation: isTopCard ? 5 : 0,
                         }]}>
+                            {/* Front Side */}
                             <Animated.View style={[styles.imageContainer, frontAnimatedStyle, {
                                 backfaceVisibility: 'hidden',
                             }]}>
@@ -193,11 +188,13 @@ const IndexScreen = () => {
                                     style={styles.gradientOverlay}
                                 >
                                     <View style={styles.textContainer}>
-                                        <Text style={styles.name}>{card.name}</Text>
-                                        <Text style={styles.year}>{card.year}</Text>
+                                    <Text style={[styles.name, { color: 'white' }]}>{card.name}</Text>
+                                    <Text style={[styles.year, { color: 'white' }]}>{card.year}</Text>
                                     </View>
                                 </LinearGradient>
                             </Animated.View>
+
+                            {/* Back Side */}
                             <Animated.View style={[styles.imageContainer, backAnimatedStyle, {
                                 backfaceVisibility: 'hidden',
                                 position: 'absolute',
@@ -218,14 +215,26 @@ const IndexScreen = () => {
                                     <Image source={card.flippedImage} style={styles.flippedImage} resizeMode="cover" />
                                 </View>
                                 <View style={styles.flippedTextContainer}>
-                                    <Text style={styles.sectionHeader}>About</Text>
-                                    <Text style={styles.textEntry}>{card.bio}</Text>
-                                    <View style={styles.divider}></View>
-                                    <Text style={styles.sectionHeader}>Major</Text>
-                                    <Text style={styles.textEntry}>{card.major}</Text>
-                                    <View style={styles.divider}></View>
-                                    <Text style={styles.sectionHeader}>Hobbies</Text>
-                                    <Text style={styles.textEntry}>{card.hobbies.join(', ')}</Text>
+                                    <View style={styles.nameContainer}>
+                                        <Text style={styles.name}>{card.name}</Text>
+                                        <Text style={styles.year}>{card.year}</Text>
+                                    </View>
+                                    <View style={styles.infoContainer}>
+                                        <View style={styles.row}>
+                                            <View style={styles.smallSection}>
+                                                <Text style={styles.sectionHeader}>Hobbies</Text>
+                                                <Text style={styles.textEntry}>{card.hobbies.join(', ')}</Text>
+                                            </View>
+                                            <View style={styles.smallSection}>
+                                                <Text style={styles.sectionHeader}>Major</Text>
+                                                <Text style={styles.textEntry}>{card.major}</Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.largeSection}>
+                                            <Text style={styles.sectionHeader}>About</Text>
+                                            <Text style={styles.textEntry}>{card.bio}</Text>
+                                        </View>
+                                    </View>
                                 </View>
                             </Animated.View>
                         </Animated.View>
@@ -264,25 +273,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#162238',
-        paddingTop: 30
-    },
-    divider: {
-        borderBottomColor: '#444',
-        borderBottomWidth: 1,
-        marginVertical: 8,
-    },
-    textEntry: {
-        fontSize: 16,
-        color: '#E5C19E',
-        lineHeight: 24,
-        marginBottom: 10,
-    },
-    sectionHeader: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#D8C3A5',
-        paddingVertical: 5,
-        marginTop: 5,
+        paddingTop: 30,
     },
     logo: {
         position: 'absolute',
@@ -325,20 +316,13 @@ const styles = StyleSheet.create({
     flippedImageContainer: {
         width: '80%',
         height: '40%',
-        marginTop: 20,
+        marginTop: 20, // Increased from 10 to 20
         borderRadius: 20,
         overflow: 'hidden',
-    },
+      },
     flippedImage: {
         width: '100%',
         height: '100%',
-    },
-    flippedTextContainer: {
-        flex: 1,
-        width: '100%',
-        paddingHorizontal: 20,
-        paddingTop: 10,
-        paddingBottom: 20,
     },
     gradientOverlay: {
         width: '100%',
@@ -354,22 +338,66 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         marginBottom: 60,
     },
-    name: {
-        fontSize: 22,
+    flippedTextContainer: {
+        flex: 1,
+        width: '100%',
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 20,
+    },
+    nameContainer: {
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    infoContainer: {
+        width: '100%',
+        alignItems: 'stretch',
+        marginTop: 10,
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+    },
+    smallSection: {
+        flex: 1,
+        padding: 10,
+        borderRadius: 8,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        marginHorizontal: 5,
+        justifyContent: 'center', // Center content vertically
+        alignItems: 'center', // Center content horizontally
+    },
+    largeSection: {
+        width: '100%',
+        padding: 10,
+        borderRadius: 8,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        justifyContent: 'center', // Center content vertically
+        alignItems: 'center', // Center content horizontally
+    },
+    sectionHeader: {
+        fontSize: 16,
         fontWeight: 'bold',
-        color: '#fff',
+        color: '#D8C3A5',
+        marginBottom: 5,
+        textAlign: 'center', // Center text
+    },
+    textEntry: {
+        fontSize: 14,
+        color: '#E5C19E',
+        lineHeight: 20,
+        textAlign: 'center', // Center text
+    },
+    name: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#E5C19E',
         fontFamily: 'Montserrat_700Bold',
     },
     year: {
-        fontSize: 18,
-        color: '#fff',
-        fontFamily: 'Montserrat_400Regular',
-    },
-    bio: {
         fontSize: 16,
-        color: '#333',
-        textAlign: 'center',
-        marginTop: 10,
+        color: '#E5C19E',
         fontFamily: 'Montserrat_400Regular',
     },
     buttonContainer: {
